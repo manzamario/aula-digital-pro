@@ -44,18 +44,6 @@ const DEMO_USERS = {
         ],
         escuelaActual: null
     },
-    docenteUnaEscuela: {
-        id: 2,
-        rol: 'docente',
-        nombre: 'López',
-        apellido: 'Prof.',
-        email: 'lopez@escuela.edu',
-        materia: 'Matemática',
-        escuelas: [
-            { id: 4, nombre: 'Escuela Nacional N°12', direccion: 'San Juan 456', cursos: ['1°A', '2°B', '3°C'] }
-        ],
-        escuelaActual: null
-    },
     alumno: {
         id: 101,
         rol: 'alumno',
@@ -68,8 +56,9 @@ const DEMO_USERS = {
     admin: {
         id: 1,
         rol: 'admin',
-        nombre: 'Administrador',
-        apellido: 'Principal',
+        nombre: 'Luis',
+        apellido: 'Manzanelli',
+        emailCompleto: 'Mario Luis Manzanelli',
         email: 'admin@auladigital.com',
         password: 'Admin2026!Seguro'
     }
@@ -414,9 +403,6 @@ function initViewContent(viewId) {
 // ============================================
 document.getElementById('login-form-docente')?.addEventListener('submit', function(e) {
     e.preventDefault();
-    const email = document.getElementById('login-docente-email').value;
-    const password = document.getElementById('login-docente-password').value;
-
     const user = DEMO_USERS.docente;
     if (user.escuelas.length > 1) {
         showSchoolSelector(user);
@@ -449,24 +435,8 @@ document.getElementById('login-form-admin')?.addEventListener('submit', function
         return;
     }
     showApp('admin');
-    showToast('¡Bienvenido, Administrador!', 'success');
+    showToast(`¡Bienvenido, ${DEMO_USERS.admin.emailCompleto}!`, 'success');
 });
-
-function demoLogin(role) {
-    if (role === 'docente') {
-        const user = DEMO_USERS.docente;
-        if (user.escuelas.length > 1) {
-            showSchoolSelector(user);
-        } else {
-            user.escuelaActual = user.escuelas[0];
-            showApp('docente');
-        }
-        showToast(`Demo: Prof. ${user.apellido} - ${user.escuelaActual?.nombre || ''}`, 'success');
-    } else if (role === 'alumno') {
-        showApp('alumno');
-        showToast('Demo: Juan Pérez - 3°A Informática', 'success');
-    }
-}
 
 function showSchoolSelector(user) {
     document.querySelectorAll('.screen').forEach(s => s.style.display = 'none');

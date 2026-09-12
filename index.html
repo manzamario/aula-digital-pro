@@ -66,13 +66,12 @@
                     <span class="welcome-card-btn">Ingresar como Alumno →</span>
                 </div>
             </div>
-            <div class="welcome-admin-link">
-                <a href="#" onclick="showScreen('screen-login-admin')">⚙️ Acceso Administrador</a>
-            </div>
         </div>
     </div>
 
-    <!-- ==================== PLATAFORMA DOCENTE - LOGIN ==================== -->
+    <!-- ======================================================================
+         PLATAFORMA DOCENTE - Solo cosas de docente, nada de alumno
+         ====================================================================== -->
     <div id="screen-login-docente" class="screen" style="display:none;">
         <div class="login-container">
             <div class="login-header login-header-docente">
@@ -82,11 +81,11 @@
             </div>
             <form id="login-form-docente" class="login-form">
                 <div class="form-group">
-                    <label for="login-docente-email">Email</label>
+                    <label>Email</label>
                     <input type="email" id="login-docente-email" placeholder="tu@email.com" required>
                 </div>
                 <div class="form-group">
-                    <label for="login-docente-password">Contraseña</label>
+                    <label>Contraseña</label>
                     <div class="password-input">
                         <input type="password" id="login-docente-password" placeholder="••••••••" required>
                         <button type="button" class="toggle-password" onclick="togglePassword('login-docente-password')">👁</button>
@@ -98,17 +97,12 @@
                     <a href="#" onclick="showScreen('screen-forgot-docente')">¿Olvidaste tu contraseña?</a>
                 </div>
             </form>
-            <div class="login-demo">
-                <p>Demo rápida:</p>
-                <button class="btn btn-outline btn-sm btn-full" onclick="demoLogin('docente')">📚 Entrar como Docente Demo</button>
-            </div>
             <div class="login-back">
                 <a href="#" onclick="showScreen('screen-welcome')">← Volver al inicio</a>
             </div>
         </div>
     </div>
 
-    <!-- ==================== PLATAFORMA DOCENTE - REGISTRO ==================== -->
     <div id="screen-register-docente" class="screen" style="display:none;">
         <div class="form-container">
             <button class="btn-back" onclick="showScreen('screen-login-docente')">← Volver</button>
@@ -180,7 +174,6 @@
         </div>
     </div>
 
-    <!-- ==================== PLATAFORMA DOCENTE - RECUPERAR ==================== -->
     <div id="screen-forgot-docente" class="screen" style="display:none;">
         <div class="form-container">
             <button class="btn-back" onclick="showScreen('screen-login-docente')">← Volver</button>
@@ -198,7 +191,9 @@
         </div>
     </div>
 
-    <!-- ==================== PLATAFORMA ALUMNO - LOGIN ==================== -->
+    <!-- ======================================================================
+         PLATAFORMA ALUMNO - Solo cosas de alumno, nada de docente
+         ====================================================================== -->
     <div id="screen-login-alumno" class="screen" style="display:none;">
         <div class="login-container">
             <div class="login-header login-header-alumno">
@@ -208,11 +203,11 @@
             </div>
             <form id="login-form-alumno" class="login-form">
                 <div class="form-group">
-                    <label for="login-alumno-email">Email o DNI</label>
+                    <label>Email o DNI</label>
                     <input type="text" id="login-alumno-email" placeholder="tu@email.com o tu DNI" required>
                 </div>
                 <div class="form-group">
-                    <label for="login-alumno-password">Contraseña</label>
+                    <label>Contraseña</label>
                     <div class="password-input">
                         <input type="password" id="login-alumno-password" placeholder="••••••••" required>
                         <button type="button" class="toggle-password" onclick="togglePassword('login-alumno-password')">👁</button>
@@ -224,17 +219,12 @@
                     <a href="#" onclick="showScreen('screen-forgot-alumno')">¿Olvidaste tu contraseña?</a>
                 </div>
             </form>
-            <div class="login-demo">
-                <p>Demo rápida:</p>
-                <button class="btn btn-outline btn-sm btn-full" onclick="demoLogin('alumno')">🎓 Entrar como Alumno Demo</button>
-            </div>
             <div class="login-back">
                 <a href="#" onclick="showScreen('screen-welcome')">← Volver al inicio</a>
             </div>
         </div>
     </div>
 
-    <!-- ==================== PLATAFORMA ALUMNO - REGISTRO ==================== -->
     <div id="screen-register-alumno" class="screen" style="display:none;">
         <div class="form-container">
             <button class="btn-back" onclick="showScreen('screen-login-alumno')">← Volver</button>
@@ -321,7 +311,6 @@
         </div>
     </div>
 
-    <!-- ==================== PLATAFORMA ALUMNO - RECUPERAR ==================== -->
     <div id="screen-forgot-alumno" class="screen" style="display:none;">
         <div class="form-container">
             <button class="btn-back" onclick="showScreen('screen-login-alumno')">← Volver</button>
@@ -339,21 +328,23 @@
         </div>
     </div>
 
-    <!-- ==================== PLATAFORMA ADMIN - LOGIN ==================== -->
+    <!-- ======================================================================
+         PLATAFORMA ADMIN - Solo Mario Luis Manzanelli
+         ====================================================================== -->
     <div id="screen-login-admin" class="screen" style="display:none;">
         <div class="login-container">
             <div class="login-header login-header-admin">
                 <div class="login-logo">⚙️</div>
-                <h1>Panel <span class="highlight">Admin</span></h1>
+                <h1>Panel <span class="highlight">Administrativo</span></h1>
                 <p>Solo para administradores del sistema</p>
             </div>
             <form id="login-form-admin" class="login-form">
                 <div class="form-group">
-                    <label for="login-admin-email">Email</label>
+                    <label>Email</label>
                     <input type="email" id="login-admin-email" placeholder="admin@auladigital.com" required>
                 </div>
                 <div class="form-group">
-                    <label for="login-admin-password">Contraseña</label>
+                    <label>Contraseña</label>
                     <div class="password-input">
                         <input type="password" id="login-admin-password" placeholder="••••••••" required>
                         <button type="button" class="toggle-password" onclick="togglePassword('login-admin-password')">👁</button>
@@ -366,39 +357,8 @@
             </div>
         </div>
     </div>
-                <div class="form-group">
-                    <label>Escuelas a cargo *</label>
-                    <small class="form-help">Separá las escuelas con punto y coma ( ; )</small>
-                    <input type="text" id="regd-escuelas" required placeholder="Ej: Escuela ABC; Escuela XYZ; Escuela 123">
-                </div>
-                <div class="form-group">
-                    <label>Contraseña *</label>
-                    <div class="password-input">
-                        <input type="password" id="regd-password" required placeholder="Mínimo 8 caracteres" minlength="8" oninput="updatePasswordStrength('regd-password', 'regd-strength')">
-                        <button type="button" class="toggle-password" onclick="togglePassword('regd-password')">👁</button>
-                    </div>
-                    <div class="password-strength" id="regd-strength">
-                        <div class="strength-bar"></div>
-                        <div class="strength-bar"></div>
-                        <div class="strength-bar"></div>
-                        <div class="strength-bar"></div>
-                        <div class="strength-bar"></div>
-                        <span class="password-strength-text"></span>
-                    </div>
-                </div>
-                <div class="form-group">
-                    <label>Confirmar Contraseña *</label>
-                    <div class="password-input">
-                        <input type="password" id="regd-password-confirm" required placeholder="Repetí tu contraseña" minlength="8">
-                        <button type="button" class="toggle-password" onclick="togglePassword('regd-password-confirm')">👁</button>
-                    </div>
-                </div>
-                <button type="submit" class="btn btn-primary btn-full">Crear Cuenta Docente</button>
-            </form>
-        </div>
-    </div>
 
-    <!-- ==================== SELECTOR DE ESCUELA ==================== -->
+    <!-- SELECTOR DE ESCUELA (Docente con múltiples escuelas) -->
     <div id="screen-select-escuela" class="screen" style="display:none;">
         <div class="form-container" style="max-width:520px;">
             <div class="form-header" style="text-align:center;">
@@ -406,9 +366,7 @@
                 <h2>Seleccioná tu Escuela</h2>
                 <p id="select-escuela-subtitle">Tenés varias escuelas a cargo. Elegí en cuál querés trabajar ahora.</p>
             </div>
-            <div class="escuelas-list" id="escuelas-list">
-                <!-- Dynamic escuelas -->
-            </div>
+            <div class="escuelas-list" id="escuelas-list"></div>
             <div style="text-align:center; margin-top:1.5rem;">
                 <a href="#" onclick="logout()" style="font-size:0.85rem; color:var(--text-muted);">Cerrar sesión</a>
             </div>
