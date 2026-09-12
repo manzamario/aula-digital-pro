@@ -126,6 +126,69 @@ function showApp(role) {
         showView('view-dashboard-alumno');
     } else if (role === 'admin') {
         showView('view-dashboard-admin');
+        populateAdminDashboard();
+    }
+}
+
+// ============================================
+// ADMIN - POPULATE DASHBOARD (XAMPP style)
+// ============================================
+function populateAdminDashboard() {
+    // Count stats
+    const docenteCount = USERS.docente ? 1 : 0;
+    const alumnoCount = ALUMNOS_REGISTRADOS.length;
+    const escuelas = [];
+    if (USERS.docente && USERS.docente.escuelas) {
+        USERS.docente.escuelas.forEach(e => {
+            if (!escuelas.includes(e.nombre)) escuelas.push(e.nombre);
+        });
+    }
+    ALUMNOS_REGISTRADOS.forEach(a => {
+        if (a.escuela && !escuelas.includes(a.escuela)) escuelas.push(a.escuela);
+    });
+
+    document.getElementById('admin-count-docentes').textContent = docenteCount;
+    document.getElementById('admin-count-alumnos').textContent = alumnoCount;
+    document.getElementById('admin-count-escuelas').textContent = escuelas.length;
+    document.getElementById('admin-badge-docentes').textContent = docenteCount + ' registros';
+    document.getElementById('admin-badge-alumnos').textContent = alumnoCount + ' registros';
+
+    // Populate docentes table
+    const docBody = document.getElementById('admin-docentes-body');
+    if (USERS.docente) {
+        const d = USERS.docente;
+        const escuelasStr = d.escuelas.map(e => e.nombre).join(', ');
+        docBody.innerHTML = `<tr>
+            <td>${d.id}</td>
+            <td>${d.nombre}</td>
+            <td>${d.apellido}</td>
+            <td>${d.email}</td>
+            <td>${d.materia || '-'}</td>
+            <td>${escuelasStr}</td>
+            <td><span class="badge-activo">Activo</span></td>
+        </tr>`;
+    } else {
+        docBody.innerHTML = '<tr><td colspan="7" class="empty-state">No hay docentes registrados</td></tr>';
+    }
+
+    // Populate alumnos table
+    const aluBody = document.getElementById('admin-alumnos-body');
+    if (ALUMNOS_REGISTRADOS.length > 0) {
+        aluBody.innerHTML = ALUMNOS_REGISTRADOS.map(a => `<tr>
+            <td>${a.id}</td>
+            <td>${a.nombre}</td>
+            <td>${a.apellido}</td>
+            <td>${a.dni}</td>
+            <td>${a.edad}</td>
+            <td>${a.curso}° Año</td>
+            <td>${a.division}</td>
+            <td>${a.escuela}</td>
+            <td>${a.email}</td>
+            <td>${a.whatsapp}</td>
+            <td><span class="badge-conectado">Registrado</span></td>
+        </tr>`).join('');
+    } else {
+        aluBody.innerHTML = '<tr><td colspan="11" class="empty-state">No hay alumnos registrados</td></tr>';
     }
 }
 
