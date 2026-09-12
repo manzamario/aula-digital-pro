@@ -63,7 +63,10 @@
                 </div>
                 <button type="submit" class="btn btn-primary btn-full">Ingresar</button>
                 <div class="login-links">
+                    <a href="#" onclick="showScreen('screen-register-docente')">¿Sos docente? Registrate acá</a>
                     <a href="#" onclick="showScreen('screen-register-alumno')">¿Sos alumno? Registrate acá</a>
+                </div>
+                <div class="login-links" style="margin-top:0.5rem;">
                     <a href="#" onclick="showScreen('screen-forgot')">¿Olvidaste tu contraseña?</a>
                 </div>
             </form>
@@ -74,6 +77,9 @@
                     <button class="btn btn-outline btn-sm" onclick="demoLogin('alumno')">🎓 Alumno</button>
                     <button class="btn btn-outline btn-sm" onclick="demoLogin('admin')">⚙️ Admin</button>
                 </div>
+                <p style="font-size:0.7rem; color:var(--text-muted); margin-top:0.5rem;">
+                    Admin: usa la contraseña del formulario
+                </p>
             </div>
         </div>
     </div>
@@ -152,6 +158,92 @@
                 </div>
                 <button type="submit" class="btn btn-primary btn-full">Crear Cuenta</button>
             </form>
+        </div>
+    </div>
+
+    <!-- ==================== REGISTRO DOCENTE ==================== -->
+    <div id="screen-register-docente" class="screen" style="display:none;">
+        <div class="form-container">
+            <button class="btn-back" onclick="showScreen('screen-login')">← Volver</button>
+            <div class="form-header">
+                <h2>Registro de Docente</h2>
+                <p>Creá tu cuenta para comenzar a gestionar tus cursos</p>
+            </div>
+            <form id="register-docente-form" class="form-vertical">
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Apellido *</label>
+                        <input type="text" id="regd-apellido" required placeholder="Tu apellido">
+                    </div>
+                    <div class="form-group">
+                        <label>Nombre *</label>
+                        <input type="text" id="regd-nombre" required placeholder="Tu nombre">
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>DNI *</label>
+                        <input type="text" id="regd-dni" required placeholder="Número de documento">
+                    </div>
+                    <div class="form-group">
+                        <label>Teléfono</label>
+                        <input type="tel" id="regd-telefono" placeholder="+54 9 11 1234-5678">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>Email *</label>
+                    <input type="email" id="regd-email" required placeholder="tu@email.com">
+                </div>
+                <div class="form-group">
+                    <label>Materia que dicta *</label>
+                    <input type="text" id="regd-materia" required placeholder="Ej: Informática, Matemática, etc.">
+                </div>
+                <div class="form-group">
+                    <label>Escuelas a cargo *</label>
+                    <small class="form-help">Separá las escuelas con punto y coma ( ; )</small>
+                    <input type="text" id="regd-escuelas" required placeholder="Ej: Escuela ABC; Escuela XYZ; Escuela 123">
+                </div>
+                <div class="form-group">
+                    <label>Contraseña *</label>
+                    <div class="password-input">
+                        <input type="password" id="regd-password" required placeholder="Mínimo 8 caracteres" minlength="8" oninput="updatePasswordStrength('regd-password', 'regd-strength')">
+                        <button type="button" class="toggle-password" onclick="togglePassword('regd-password')">👁</button>
+                    </div>
+                    <div class="password-strength" id="regd-strength">
+                        <div class="strength-bar"></div>
+                        <div class="strength-bar"></div>
+                        <div class="strength-bar"></div>
+                        <div class="strength-bar"></div>
+                        <div class="strength-bar"></div>
+                        <span class="password-strength-text"></span>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>Confirmar Contraseña *</label>
+                    <div class="password-input">
+                        <input type="password" id="regd-password-confirm" required placeholder="Repetí tu contraseña" minlength="8">
+                        <button type="button" class="toggle-password" onclick="togglePassword('regd-password-confirm')">👁</button>
+                    </div>
+                </div>
+                <button type="submit" class="btn btn-primary btn-full">Crear Cuenta Docente</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- ==================== SELECTOR DE ESCUELA ==================== -->
+    <div id="screen-select-escuela" class="screen" style="display:none;">
+        <div class="form-container" style="max-width:520px;">
+            <div class="form-header" style="text-align:center;">
+                <div style="font-size:3rem; margin-bottom:0.5rem;">🏫</div>
+                <h2>Seleccioná tu Escuela</h2>
+                <p id="select-escuela-subtitle">Tenés varias escuelas a cargo. Elegí en cuál querés trabajar ahora.</p>
+            </div>
+            <div class="escuelas-list" id="escuelas-list">
+                <!-- Dynamic escuelas -->
+            </div>
+            <div style="text-align:center; margin-top:1.5rem;">
+                <a href="#" onclick="logout()" style="font-size:0.85rem; color:var(--text-muted);">Cerrar sesión</a>
+            </div>
         </div>
     </div>
 

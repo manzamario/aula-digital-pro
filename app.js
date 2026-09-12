@@ -36,7 +36,25 @@ const DEMO_USERS = {
         nombre: 'García',
         apellido: 'Prof.',
         email: 'garcia@escuela.edu',
-        cursos: 4
+        materia: 'Informática',
+        escuelas: [
+            { id: 1, nombre: 'Escuela Técnica N°1 "San Martín"', direccion: 'Av. Principal 1234', cursos: ['3°A', '4°B', '5°A'] },
+            { id: 2, nombre: 'Escuela Secundaria N°5', direccion: 'Calle Libertad 567', cursos: ['1°C', '2°A'] },
+            { id: 3, nombre: 'Instituto Politécnico "Belgrano"', direccion: 'Bolívar 890', cursos: ['3°B', '4°A'] }
+        ],
+        escuelaActual: null
+    },
+    docenteUnaEscuela: {
+        id: 2,
+        rol: 'docente',
+        nombre: 'López',
+        apellido: 'Prof.',
+        email: 'lopez@escuela.edu',
+        materia: 'Matemática',
+        escuelas: [
+            { id: 4, nombre: 'Escuela Nacional N°12', direccion: 'San Juan 456', cursos: ['1°A', '2°B', '3°C'] }
+        ],
+        escuelaActual: null
     },
     alumno: {
         id: 101,
@@ -50,9 +68,10 @@ const DEMO_USERS = {
     admin: {
         id: 1,
         rol: 'admin',
-        nombre: 'Admin',
-        apellido: 'Sistema',
-        email: 'admin@escuela.edu'
+        nombre: 'Administrador',
+        apellido: 'Principal',
+        email: 'admin@auladigital.com',
+        password: 'Admin2026!Seguro'
     }
 };
 
@@ -228,6 +247,12 @@ function buildSidebar(role) {
             <div class="nav-item" onclick="showView('view-integradores')" data-view="view-integradores">
                 <span class="nav-icon">📋</span> Integradores
             </div>
+            <div class="nav-section">
+                <div class="nav-section-title">Escuela</div>
+            </div>
+            <div class="nav-item" onclick="cambiarEscuela()">
+                <span class="nav-icon">🏫</span> Cambiar Escuela
+            </div>
         `;
     } else if (role === 'alumno') {
         items = `
@@ -285,13 +310,18 @@ function updateUserInfo(role) {
     const topbarAvatar = document.getElementById('topbar-avatar');
 
     const roleName = role === 'docente' ? 'Docente' : role === 'alumno' ? 'Alumno' : 'Administrador';
-    const displayName = role === 'docente' ? `${user.apellido} ${user.nombre}` :
-                         `${user.apellido} ${user.nombre}`;
+    const displayName = `${user.apellido} ${user.nombre}`;
 
     if (nameEl) nameEl.textContent = displayName;
-    if (roleEl) roleEl.textContent = roleName;
     if (avatarEl) avatarEl.textContent = user.nombre.charAt(0);
     if (topbarAvatar) topbarAvatar.textContent = user.nombre.charAt(0);
+
+    // Show school for docentes
+    if (role === 'docente' && user.escuelaActual) {
+        if (roleEl) roleEl.textContent = `${roleName} - ${user.escuelaActual.nombre}`;
+    } else {
+        if (roleEl) roleEl.textContent = roleName;
+    }
 }
 
 function toggleSidebar() {
@@ -374,15 +404,210 @@ function initViewContent(viewId) {
 document.getElementById('login-form')?.addEventListener('submit', function(e) {
     e.preventDefault();
     const role = document.getElementById('login-role').value;
-    if (role) {
-        showApp(role);
-        showToast('¡Bienvenido! Has ingresado correctamente.', 'success');
+    const email = document.getElementById('login-email').value;
+    const password = document.getElementById('login-password').value;
+
+    if (!role) {
+        showToast('Seleccioná tu rol', 'warning');
+        return;
+    }
+
+    if (role === 'admin') {
+        // Admin needs real password
+        if (password !== DEMO_USERS.admin.password) {
+            showToast('Contraseña de administrador incorrecta', 'error');
+            return;
+        }
+        showApp('admin');
+        showToast('¡Bienvenido, Administrador!', 'success');
+    } else if (role === 'docente') {
+        // Check if docente has multiple schools
+        const user = DEMO_USERS.docente;
+        if (user.escuelas.length > 1) {
+            showSchoolSelector(user);
+        } else {
+            user.escuelaActual = user.escuelas[0];
+            showApp('docente');
+        }
+        showToast('¡Bienvenido, Prof. García!', 'success');
+    } else if (role === 'alumno') {
+        showApp('alumno');
+        showToast('¡Bienvenido, Juan!', 'success');
     }
 });
 
 function demoLogin(role) {
-    showApp(role);
-    showToast(`Acceso demo como ${role.charAt(0).toUpperCase() + role.slice(1)}`, 'success');
+    if (role === 'docente') {
+        const user = DEMO_USERS.docente;
+        if (user.escuelas.length > 1) {
+            showSchoolSelector(user);
+        } else {
+            user.escuelaActual = user.escuelas[0];
+            showApp('docente');
+        }
+    } else if (role === 'admin') {
+        // Admin demo shows password requirement
+        showAdminLoginDemo();
+    } else {
+        showApp(role);
+        showToast(`Acceso demo como ${role.charAt(0).toUpperCase() + role.slice(1)}`, 'success');
+    }
+}
+
+function showAdminLoginDemo() {
+    showToast('Para acceder como Admin usá: admin@auladigital.com / Admin2026!Seguro', 'info');
+}
+
+function showSchoolSelector(user) {
+    document.querySelectorAll('.screen').forEach(s => s.style.display = 'none');
+    const appContainer = document.getElementById('app-container');
+    if (appContainer) appContainer.style.display = 'none';
+
+    const screen = document.getElementById('screen-select-escuela');
+    if (screen) screen.style.display = 'flex';
+
+    const list = document.getElementById('escuelas-list');
+    if (!list) return;
+
+    let html = '';
+    user.escuelas.forEach((escuela, index) => {
+        const colores = ['#4f46e5', '#0891b2', '#059669', '#d97706', '#dc2626'];
+        const color = colores[index % colores.length];
+        html += `
+            <div class="escuela-item" onclick="selectEscuela(${index})">
+                <div class="escuela-icon" style="background:linear-gradient(135deg, ${color}, ${color}dd);">🏫</div>
+                <div class="escuela-info">
+                    <h4>${escuela.nombre}</h4>
+                    <p>${escuela.direccion}</p>
+                    <div class="escuela-cursos">📚 ${escuela.cursos.length} cursos: ${escuela.cursos.join(', ')}</div>
+                </div>
+                <span class="escuela-arrow">→</span>
+            </div>
+        `;
+    });
+
+    list.innerHTML = html;
+    AppState._pendingDocente = user;
+}
+
+function cambiarEscuela() {
+    const user = DEMO_USERS.docente;
+    if (user && user.escuelas.length > 1) {
+        showSchoolSelector(user);
+    } else {
+        showToast('Solo tenés una escuela asignada', 'info');
+    }
+}
+
+function selectEscuela(index) {
+    const user = AppState._pendingDocente;
+    if (user && user.escuelas[index]) {
+        user.escuelaActual = user.escuelas[index];
+        showApp('docente');
+        showToast(`Trabajando en: ${user.escuelaActual.nombre}`, 'success');
+    }
+}
+
+// ============================================
+// REGISTRO DOCENTE
+// ============================================
+document.getElementById('register-docente-form')?.addEventListener('submit', function(e) {
+    e.preventDefault();
+
+    const password = document.getElementById('regd-password').value;
+    const passwordConfirm = document.getElementById('regd-password-confirm').value;
+
+    if (password !== passwordConfirm) {
+        showToast('Las contraseñas no coinciden', 'error');
+        return;
+    }
+
+    if (password.length < 8) {
+        showToast('La contraseña debe tener al menos 8 caracteres', 'error');
+        return;
+    }
+
+    const escuelasRaw = document.getElementById('regd-escuelas').value;
+    const escuelas = escuelasRaw.split(';').map(e => e.trim()).filter(e => e.length > 0);
+
+    if (escuelas.length === 0) {
+        showToast('Agregá al menos una escuela', 'error');
+        return;
+    }
+
+    const nombre = document.getElementById('regd-nombre').value;
+    const apellido = document.getElementById('regd-apellido').value;
+
+    // Create docente user
+    const newUser = {
+        id: Date.now(),
+        rol: 'docente',
+        nombre: nombre,
+        apellido: apellido,
+        email: document.getElementById('regd-email').value,
+        materia: document.getElementById('regd-materia').value,
+        escuelas: escuelas.map((e, i) => ({
+            id: i + 1,
+            nombre: e,
+            direccion: 'Dirección pendiente',
+            cursos: []
+        })),
+        escuelaActual: null
+    };
+
+    DEMO_USERS.docente = newUser;
+
+    showToast(`¡Cuenta creada! Bienvenido, Prof. ${apellido}`, 'success');
+
+    // If multiple schools, show selector; otherwise go to dashboard
+    if (newUser.escuelas.length > 1) {
+        showSchoolSelector(newUser);
+    } else {
+        newUser.escuelaActual = newUser.escuelas[0];
+        showApp('docente');
+    }
+});
+
+// ============================================
+// PASSWORD STRENGTH
+// ============================================
+function checkPasswordStrength(password) {
+    let strength = 0;
+    if (password.length >= 8) strength++;
+    if (password.length >= 12) strength++;
+    if (/[A-Z]/.test(password) && /[a-z]/.test(password)) strength++;
+    if (/[0-9]/.test(password)) strength++;
+    if (/[^A-Za-z0-9]/.test(password)) strength++;
+    return strength;
+}
+
+function updatePasswordStrength(inputId, strengthId) {
+    const input = document.getElementById(inputId);
+    const strengthEl = document.getElementById(strengthId);
+    if (!input || !strengthEl) return;
+
+    const password = input.value;
+    const strength = checkPasswordStrength(password);
+    const bars = strengthEl.querySelectorAll('.strength-bar');
+    const text = strengthEl.querySelector('.password-strength-text');
+
+    bars.forEach((bar, i) => {
+        bar.className = 'strength-bar';
+        if (password.length > 0) {
+            if (i < strength) {
+                if (strength <= 2) bar.classList.add('active-weak');
+                else if (strength <= 3) bar.classList.add('active-medium');
+                else bar.classList.add('active-strong');
+            }
+        }
+    });
+
+    if (text) {
+        if (password.length === 0) text.textContent = '';
+        else if (strength <= 2) { text.textContent = 'Débil'; text.style.color = 'var(--danger)'; }
+        else if (strength <= 3) { text.textContent = 'Media'; text.style.color = 'var(--warning)'; }
+        else { text.textContent = 'Fuerte'; text.style.color = 'var(--success)'; }
+    }
 }
 
 function logout() {
