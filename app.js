@@ -155,8 +155,19 @@ function initApp() {
         if (splash) {
             splash.style.display = 'none';
         }
-        showScreen('screen-login');
+        showScreen('screen-welcome');
     }, 3000);
+}
+
+// ============================================
+// WELCOME - NAVIGATION
+// ============================================
+function goToDocentePlatform() {
+    showScreen('screen-login-docente');
+}
+
+function goToAlumnoPlatform() {
+    showScreen('screen-login-alumno');
 }
 
 // ============================================
@@ -399,41 +410,46 @@ function initViewContent(viewId) {
 }
 
 // ============================================
-// LOGIN
+// LOGIN - DOCENTE
 // ============================================
-document.getElementById('login-form')?.addEventListener('submit', function(e) {
+document.getElementById('login-form-docente')?.addEventListener('submit', function(e) {
     e.preventDefault();
-    const role = document.getElementById('login-role').value;
-    const email = document.getElementById('login-email').value;
-    const password = document.getElementById('login-password').value;
+    const email = document.getElementById('login-docente-email').value;
+    const password = document.getElementById('login-docente-password').value;
 
-    if (!role) {
-        showToast('Seleccioná tu rol', 'warning');
+    const user = DEMO_USERS.docente;
+    if (user.escuelas.length > 1) {
+        showSchoolSelector(user);
+    } else {
+        user.escuelaActual = user.escuelas[0];
+        showApp('docente');
+    }
+    showToast(`¡Bienvenido, Prof. ${user.apellido}!`, 'success');
+});
+
+// ============================================
+// LOGIN - ALUMNO
+// ============================================
+document.getElementById('login-form-alumno')?.addEventListener('submit', function(e) {
+    e.preventDefault();
+    showApp('alumno');
+    showToast('¡Bienvenido, Juan!', 'success');
+});
+
+// ============================================
+// LOGIN - ADMIN
+// ============================================
+document.getElementById('login-form-admin')?.addEventListener('submit', function(e) {
+    e.preventDefault();
+    const email = document.getElementById('login-admin-email').value;
+    const password = document.getElementById('login-admin-password').value;
+
+    if (password !== DEMO_USERS.admin.password) {
+        showToast('Contraseña de administrador incorrecta', 'error');
         return;
     }
-
-    if (role === 'admin') {
-        // Admin needs real password
-        if (password !== DEMO_USERS.admin.password) {
-            showToast('Contraseña de administrador incorrecta', 'error');
-            return;
-        }
-        showApp('admin');
-        showToast('¡Bienvenido, Administrador!', 'success');
-    } else if (role === 'docente') {
-        // Check if docente has multiple schools
-        const user = DEMO_USERS.docente;
-        if (user.escuelas.length > 1) {
-            showSchoolSelector(user);
-        } else {
-            user.escuelaActual = user.escuelas[0];
-            showApp('docente');
-        }
-        showToast('¡Bienvenido, Prof. García!', 'success');
-    } else if (role === 'alumno') {
-        showApp('alumno');
-        showToast('¡Bienvenido, Juan!', 'success');
-    }
+    showApp('admin');
+    showToast('¡Bienvenido, Administrador!', 'success');
 });
 
 function demoLogin(role) {
@@ -445,17 +461,11 @@ function demoLogin(role) {
             user.escuelaActual = user.escuelas[0];
             showApp('docente');
         }
-    } else if (role === 'admin') {
-        // Admin demo shows password requirement
-        showAdminLoginDemo();
-    } else {
-        showApp(role);
-        showToast(`Acceso demo como ${role.charAt(0).toUpperCase() + role.slice(1)}`, 'success');
+        showToast(`Demo: Prof. ${user.apellido} - ${user.escuelaActual?.nombre || ''}`, 'success');
+    } else if (role === 'alumno') {
+        showApp('alumno');
+        showToast('Demo: Juan Pérez - 3°A Informática', 'success');
     }
-}
-
-function showAdminLoginDemo() {
-    showToast('Para acceder como Admin usá: admin@auladigital.com / Admin2026!Seguro', 'info');
 }
 
 function showSchoolSelector(user) {
@@ -613,7 +623,7 @@ function updatePasswordStrength(inputId, strengthId) {
 function logout() {
     AppState.currentRole = null;
     AppState.currentUser = null;
-    showScreen('screen-login');
+    showScreen('screen-welcome');
     showToast('Sesión cerrada', 'success');
 }
 

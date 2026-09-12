@@ -472,6 +472,163 @@ input, select, textarea, button {
 }
 
 /* ============================================
+   WELCOME SCREEN
+   ============================================ */
+.welcome-container {
+    width: 100%;
+    max-width: 900px;
+    text-align: center;
+}
+
+.welcome-header {
+    margin-bottom: 2.5rem;
+}
+
+.welcome-logo {
+    font-size: 4rem;
+    margin-bottom: 0.75rem;
+}
+
+.welcome-header h1 {
+    font-size: 2.5rem;
+    font-weight: 800;
+    color: var(--text);
+}
+
+.welcome-header .highlight {
+    color: var(--primary);
+}
+
+.welcome-header p {
+    color: var(--text-secondary);
+    font-size: 1.1rem;
+    margin-top: 0.5rem;
+}
+
+.welcome-cards {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1.5rem;
+    margin-bottom: 2rem;
+}
+
+.welcome-card {
+    background: white;
+    border-radius: var(--radius-lg);
+    padding: 2.5rem 2rem;
+    cursor: pointer;
+    transition: var(--transition-slow);
+    border: 3px solid transparent;
+    text-align: left;
+    box-shadow: var(--shadow-md);
+}
+
+.welcome-card:hover {
+    transform: translateY(-6px);
+    box-shadow: var(--shadow-xl);
+}
+
+.welcome-docente:hover {
+    border-color: var(--primary);
+}
+
+.welcome-alumno:hover {
+    border-color: var(--success);
+}
+
+.welcome-card-icon {
+    font-size: 3rem;
+    margin-bottom: 1rem;
+}
+
+.welcome-card h2 {
+    font-size: 1.5rem;
+    font-weight: 800;
+    margin-bottom: 0.5rem;
+}
+
+.welcome-docente h2 { color: var(--primary); }
+.welcome-alumno h2 { color: var(--success); }
+
+.welcome-card p {
+    color: var(--text-secondary);
+    font-size: 0.95rem;
+    margin-bottom: 1.25rem;
+    line-height: 1.5;
+}
+
+.welcome-card-features {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    margin-bottom: 1.5rem;
+}
+
+.welcome-card-features span {
+    font-size: 0.75rem;
+    padding: 0.3rem 0.7rem;
+    background: var(--bg);
+    border-radius: 20px;
+    color: var(--text-secondary);
+    font-weight: 500;
+}
+
+.welcome-card-btn {
+    display: inline-block;
+    font-weight: 700;
+    font-size: 0.95rem;
+    transition: var(--transition);
+}
+
+.welcome-docente .welcome-card-btn { color: var(--primary); }
+.welcome-alumno .welcome-card-btn { color: var(--success); }
+
+.welcome-card:hover .welcome-card-btn {
+    transform: translateX(4px);
+}
+
+.welcome-admin-link {
+    margin-top: 1rem;
+}
+
+.welcome-admin-link a {
+    font-size: 0.85rem;
+    color: var(--text-muted);
+}
+
+.welcome-admin-link a:hover {
+    color: var(--text);
+}
+
+/* Login headers por plataforma */
+.login-header-docente {
+    background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+}
+
+.login-header-alumno {
+    background: linear-gradient(135deg, #059669 0%, #047857 100%);
+}
+
+.login-header-admin {
+    background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
+}
+
+.login-back {
+    text-align: center;
+    padding: 1rem 2rem;
+    border-top: 1px solid var(--border);
+}
+
+.login-back a {
+    font-size: 0.85rem;
+    color: var(--text-muted);
+}
+
+.login-back a:hover {
+    color: var(--primary);
+}
+
+/* ============================================
    ESCUELA SELECTOR
    ============================================ */
 .escuelas-list {
