@@ -460,8 +460,13 @@ document.getElementById('login-form-alumno')?.addEventListener('submit', functio
 // ============================================
 document.getElementById('login-form-admin')?.addEventListener('submit', function(e) {
     e.preventDefault();
-    const email = document.getElementById('login-admin-email').value;
+    const email = document.getElementById('login-admin-email').value.trim();
     const password = document.getElementById('login-admin-password').value;
+
+    if (email !== USERS.admin.email) {
+        showToast('Email de administrador no encontrado', 'error');
+        return;
+    }
 
     if (password !== USERS.admin.password) {
         showToast('Contraseña de administrador incorrecta', 'error');
