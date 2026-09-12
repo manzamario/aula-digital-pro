@@ -3107,6 +3107,79 @@ input, select, textarea, button {
 .mb-3 { margin-bottom: 1.5rem; }
 .text-center { text-align: center; }
 
+/* ============================================
+   ADMIN - DATABASE TABLES (XAMPP style)
+   ============================================ */
+.db-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.82rem;
+    font-family: 'JetBrains Mono', monospace;
+    background: #fff;
+    border: 1px solid #d1d5db;
+}
+.db-table thead {
+    background: linear-gradient(180deg, #4f46e5 0%, #3730a3 100%);
+    color: #fff;
+}
+.db-table th {
+    padding: 0.6rem 0.8rem;
+    text-align: left;
+    font-weight: 600;
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    border-right: 1px solid rgba(255,255,255,0.15);
+    white-space: nowrap;
+}
+.db-table th:last-child { border-right: none; }
+.db-table td {
+    padding: 0.5rem 0.8rem;
+    border-bottom: 1px solid #e5e7eb;
+    border-right: 1px solid #f3f4f6;
+    white-space: nowrap;
+    max-width: 200px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+.db-table tbody tr:nth-child(even) { background: #f8fafc; }
+.db-table tbody tr:nth-child(odd) { background: #fff; }
+.db-table tbody tr:hover { background: #eef2ff; }
+.db-table .empty-state {
+    text-align: center;
+    color: #94a3b8;
+    font-style: italic;
+    padding: 2rem;
+    font-family: 'Inter', sans-serif;
+}
+.db-table .badge-activo {
+    background: #dcfce7;
+    color: #166534;
+    padding: 0.15rem 0.5rem;
+    border-radius: 999px;
+    font-size: 0.7rem;
+    font-weight: 600;
+    font-family: 'Inter', sans-serif;
+}
+.db-table .badge-conectado {
+    background: #dbeafe;
+    color: #1e40af;
+    padding: 0.15rem 0.5rem;
+    border-radius: 999px;
+    font-size: 0.7rem;
+    font-weight: 600;
+    font-family: 'Inter', sans-serif;
+}
+.db-table .badge-desconectado {
+    background: #f3f4f6;
+    color: #6b7280;
+    padding: 0.15rem 0.5rem;
+    border-radius: 999px;
+    font-size: 0.7rem;
+    font-weight: 600;
+    font-family: 'Inter', sans-serif;
+}
+
 /* Print styles */
 @media print {
     .sidebar, .topbar, .exit-banner, .reingreso-pending { display: none !important; }

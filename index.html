@@ -630,28 +630,28 @@
             <div id="view-dashboard-admin" class="view" style="display:none;">
                 <div class="dashboard-greeting">
                     <h1>Panel de Administración ⚙️</h1>
-                    <p>Gestión general de la plataforma</p>
+                    <p>Base de datos de la plataforma</p>
                 </div>
                 <div class="stats-grid">
                     <div class="stat-card stat-blue">
                         <div class="stat-icon">👥</div>
                         <div class="stat-info">
-                            <span class="stat-number">0</span>
+                            <span class="stat-number" id="admin-count-docentes">0</span>
                             <span class="stat-label">Docentes</span>
                         </div>
                     </div>
                     <div class="stat-card stat-green">
                         <div class="stat-icon">🎓</div>
                         <div class="stat-info">
-                            <span class="stat-number">0</span>
+                            <span class="stat-number" id="admin-count-alumnos">0</span>
                             <span class="stat-label">Alumnos</span>
                         </div>
                     </div>
                     <div class="stat-card stat-orange">
-                        <div class="stat-icon">📚</div>
+                        <div class="stat-icon">🏫</div>
                         <div class="stat-info">
-                            <span class="stat-number">0</span>
-                            <span class="stat-label">Cursos</span>
+                            <span class="stat-number" id="admin-count-escuelas">0</span>
+                            <span class="stat-label">Escuelas</span>
                         </div>
                     </div>
                     <div class="stat-card stat-purple">
@@ -662,23 +662,60 @@
                         </div>
                     </div>
                 </div>
-                <div class="dashboard-grid">
-                    <div class="card">
-                        <div class="card-header">
-                            <h3>👤 Gestionar Docentes</h3>
-                            <button class="btn btn-primary btn-sm" onclick="showModal('modal-nuevo-docente')">+ Nuevo</button>
-                        </div>
-                        <div class="card-body">
-                            <p class="empty-state">No hay docentes registrados.</p>
-                        </div>
+
+                <!-- TABLA DOCENTES -->
+                <div class="card" style="margin-bottom:1.5rem;">
+                    <div class="card-header">
+                        <h3>👤 Docentes Registrados</h3>
+                        <span class="badge badge-blue" id="admin-badge-docentes">0 registros</span>
                     </div>
-                    <div class="card">
-                        <div class="card-header">
-                            <h3>📊 Uso de WhatsApp</h3>
-                        </div>
-                        <div class="card-body">
-                            <p class="empty-state">No hay datos de uso de WhatsApp.</p>
-                        </div>
+                    <div class="card-body" style="overflow-x:auto;">
+                        <table class="db-table" id="admin-table-docentes">
+                            <thead>
+                                <tr>
+                                    <th>ID</th>
+                                    <th>Nombre</th>
+                                    <th>Apellido</th>
+                                    <th>Email</th>
+                                    <th>Materia</th>
+                                    <th>Escuelas</th>
+                                    <th>Estado</th>
+                                </tr>
+                            </thead>
+                            <tbody id="admin-docentes-body">
+                                <tr><td colspan="7" class="empty-state">No hay docentes registrados</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- TABLA ALUMNOS -->
+                <div class="card">
+                    <div class="card-header">
+                        <h3>🎓 Alumnos Registrados</h3>
+                        <span class="badge badge-green" id="admin-badge-alumnos">0 registros</span>
+                    </div>
+                    <div class="card-body" style="overflow-x:auto;">
+                        <table class="db-table" id="admin-table-alumnos">
+                            <thead>
+                                <tr>
+                                    <th>ID</th>
+                                    <th>Nombre</th>
+                                    <th>Apellido</th>
+                                    <th>DNI</th>
+                                    <th>Edad</th>
+                                    <th>Curso</th>
+                                    <th>División</th>
+                                    <th>Escuela</th>
+                                    <th>Email</th>
+                                    <th>WhatsApp</th>
+                                    <th>Estado</th>
+                                </tr>
+                            </thead>
+                            <tbody id="admin-alumnos-body">
+                                <tr><td colspan="11" class="empty-state">No hay alumnos registrados</td></tr>
+                            </tbody>
+                        </table>
                     </div>
                 </div>
             </div>
