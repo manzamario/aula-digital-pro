@@ -27,32 +27,11 @@ const AppState = {
 };
 
 // ============================================
-// USERS DEMO
+// USERS
 // ============================================
-const DEMO_USERS = {
-    docente: {
-        id: 1,
-        rol: 'docente',
-        nombre: 'García',
-        apellido: 'Prof.',
-        email: 'garcia@escuela.edu',
-        materia: 'Informática',
-        escuelas: [
-            { id: 1, nombre: 'Escuela Técnica N°1 "San Martín"', direccion: 'Av. Principal 1234', cursos: ['3°A', '4°B', '5°A'] },
-            { id: 2, nombre: 'Escuela Secundaria N°5', direccion: 'Calle Libertad 567', cursos: ['1°C', '2°A'] },
-            { id: 3, nombre: 'Instituto Politécnico "Belgrano"', direccion: 'Bolívar 890', cursos: ['3°B', '4°A'] }
-        ],
-        escuelaActual: null
-    },
-    alumno: {
-        id: 101,
-        rol: 'alumno',
-        nombre: 'Juan',
-        apellido: 'Pérez',
-        email: 'perez@escuela.edu',
-        curso: '3°A',
-        oportunidades: 5
-    },
+const USERS = {
+    docente: null,
+    alumno: null,
     admin: {
         id: 1,
         rol: 'admin',
@@ -64,49 +43,8 @@ const DEMO_USERS = {
     }
 };
 
-const DEMO_ALUMNOS = [
-    { id: 1, nombre: 'Ana', apellido: 'García', curso: '3°A', oportunidades: 5, conectado: true },
-    { id: 2, nombre: 'Carlos', apellido: 'López', curso: '3°A', oportunidades: 4, conectado: true },
-    { id: 3, nombre: 'Sofía', apellido: 'Martínez', curso: '3°A', oportunidades: 3, conectado: true },
-    { id: 4, nombre: 'Diego', apellido: 'Rodríguez', curso: '3°A', oportunidades: 5, conectado: false },
-    { id: 5, nombre: 'Valentina', apellido: 'Fernández', curso: '3°A', oportunidades: 2, conectado: true },
-    { id: 6, nombre: 'Mateo', apellido: 'López', curso: '3°A', oportunidades: 5, conectado: true },
-    { id: 7, nombre: 'Camila', apellido: 'García', curso: '3°A', oportunidades: 4, conectado: true },
-    { id: 8, nombre: 'Santiago', apellido: 'Díaz', curso: '3°A', oportunidades: 5, conectado: false },
-    { id: 9, nombre: 'Luciana', apellido: 'Morales', curso: '3°A', oportunidades: 5, conectado: true },
-    { id: 10, nombre: 'Tomás', apellido: 'Ruiz', curso: '3°A', oportunidades: 3, conectado: true },
-    { id: 11, nombre: 'Isabella', apellido: 'Torres', curso: '3°A', opportunidades: 5, conectado: true },
-    { id: 12, nombre: 'Benjamín', apellido: 'Acosta', curso: '3°A', oportunidades: 5, conectado: true },
-    { id: 13, nombre: 'Mía', apellido: 'Romero', curso: '3°A', oportunidades: 4, conectado: true },
-    { id: 14, nombre: 'Emilio', apellido: 'Silva', curso: '3°A', oportunidades: 5, conectado: true },
-    { id: 15, nombre: 'Emma', apellido: 'Medina', curso: '3°A', oportunidades: 5, conectado: true }
-];
-
-const DEMO_PREGUNTAS = [
-    {
-        num: 1, tipo: 'multiple', tipoLabel: 'Opción Múltiple', puntos: 2,
-        enunciado: '¿Cuál es el tipo de dato correcto para almacenar el valor 3.14 en Python?',
-        opciones: ['a) int', 'b) string', 'c) float', 'd) bool']
-    },
-    {
-        num: 2, tipo: 'vf', tipoLabel: 'Verdadero / Falso', puntos: 1,
-        enunciado: 'Python es un lenguaje tipado estáticamente.',
-        opciones: ['Verdadero', 'Falso']
-    },
-    {
-        num: 3, tipo: 'corta', tipoLabel: 'Respuesta Corta', puntos: 3,
-        enunciado: '¿Cuál es la diferencia entre una lista y una tupla en Python?',
-        opciones: []
-    },
-    {
-        num: 4, tipo: 'multiple', tipoLabel: 'Opción Múltiple', puntos: 2,
-        enunciado: '¿Cuál de estos es un operador de asignación en Python?',
-        opciones: ['a) ==', 'b) =', 'c) !=', 'd) <']
-    },
-    {
-        num: 5, tipo: 'vf', tipoLabel: 'Verdadero / Falso', puntos: 1,
-        enunciado: 'En Python, las variables deben ser declaradas con su tipo antes de usarlas.',
-        opciones: ['Verdadero', 'Falso']
+let ALUMNOS_REGISTRADOS = [];
+let PREGUNTAS_BANCO = [];
     },
     {
         num: 6, tipo: 'multiple', tipoLabel: 'Opción Múltiple', puntos: 2,
@@ -181,7 +119,7 @@ function showApp(role) {
     if (appContainer) appContainer.style.display = 'flex';
 
     AppState.currentRole = role;
-    AppState.currentUser = DEMO_USERS[role];
+    AppState.currentUser = USERS[role];
 
     buildSidebar(role);
     updateUserInfo(role);
@@ -303,13 +241,22 @@ function buildSidebar(role) {
 }
 
 function updateUserInfo(role) {
-    const user = DEMO_USERS[role];
+    const user = USERS[role];
     const nameEl = document.getElementById('sidebar-user-name');
     const roleEl = document.getElementById('sidebar-user-role');
     const avatarEl = document.getElementById('sidebar-user-info')?.querySelector('.user-avatar');
     const topbarAvatar = document.getElementById('topbar-avatar');
 
     const roleName = role === 'docente' ? 'Docente' : role === 'alumno' ? 'Alumno' : 'Administrador';
+
+    if (!user) {
+        if (nameEl) nameEl.textContent = roleName;
+        if (roleEl) roleEl.textContent = '';
+        if (avatarEl) avatarEl.textContent = '?';
+        if (topbarAvatar) topbarAvatar.textContent = '?';
+        return;
+    }
+
     const displayName = `${user.apellido} ${user.nombre}`;
 
     if (nameEl) nameEl.textContent = displayName;
@@ -403,7 +350,14 @@ function initViewContent(viewId) {
 // ============================================
 document.getElementById('login-form-docente')?.addEventListener('submit', function(e) {
     e.preventDefault();
-    const user = DEMO_USERS.docente;
+    const email = document.getElementById('login-docente-email').value;
+    const user = USERS.docente;
+
+    if (!user || user.email !== email) {
+        showToast('No se encontró una cuenta de docente con ese email. Registrate primero.', 'error');
+        return;
+    }
+
     if (user.escuelas.length > 1) {
         showSchoolSelector(user);
     } else {
@@ -418,8 +372,17 @@ document.getElementById('login-form-docente')?.addEventListener('submit', functi
 // ============================================
 document.getElementById('login-form-alumno')?.addEventListener('submit', function(e) {
     e.preventDefault();
+    const email = document.getElementById('login-alumno-email').value;
+    const alumno = ALUMNOS_REGISTRADOS.find(a => a.email === email || a.dni === email);
+
+    if (!alumno) {
+        showToast('No se encontró una cuenta con ese email/DNI. Registrate primero.', 'error');
+        return;
+    }
+
+    USERS.alumno = alumno;
     showApp('alumno');
-    showToast('¡Bienvenido, Juan!', 'success');
+    showToast(`¡Bienvenido, ${alumno.nombre}!`, 'success');
 });
 
 // ============================================
@@ -430,12 +393,12 @@ document.getElementById('login-form-admin')?.addEventListener('submit', function
     const email = document.getElementById('login-admin-email').value;
     const password = document.getElementById('login-admin-password').value;
 
-    if (password !== DEMO_USERS.admin.password) {
+    if (password !== USERS.admin.password) {
         showToast('Contraseña de administrador incorrecta', 'error');
         return;
     }
     showApp('admin');
-    showToast(`¡Bienvenido, ${DEMO_USERS.admin.emailCompleto}!`, 'success');
+    showToast(`¡Bienvenido, ${USERS.admin.emailCompleto}!`, 'success');
 });
 
 function showSchoolSelector(user) {
@@ -471,7 +434,7 @@ function showSchoolSelector(user) {
 }
 
 function cambiarEscuela() {
-    const user = DEMO_USERS.docente;
+    const user = USERS.docente;
     if (user && user.escuelas.length > 1) {
         showSchoolSelector(user);
     } else {
@@ -535,7 +498,7 @@ document.getElementById('register-docente-form')?.addEventListener('submit', fun
         escuelaActual: null
     };
 
-    DEMO_USERS.docente = newUser;
+    USERS.docente = newUser;
 
     showToast(`¡Cuenta creada! Bienvenido, Prof. ${apellido}`, 'success');
 
@@ -698,7 +661,7 @@ function loadAsistenciaAlumnos() {
     if (!lista) return;
 
     let html = '';
-    DEMO_ALUMNOS.forEach(alumno => {
+    ALUMNOS_REGISTRADOS.forEach(alumno => {
         html += `
             <div class="alumno-asistencia">
                 <input type="checkbox" id="asis-${alumno.id}" ${alumno.conectado ? 'checked' : ''}>
@@ -802,7 +765,7 @@ function renderAlumnoMonitor() {
     if (!grid) return;
 
     let html = '';
-    DEMO_ALUMNOS.forEach(alumno => {
+    ALUMNOS_REGISTRADOS.forEach(alumno => {
         let dots = '';
         for (let i = 0; i < 5; i++) {
             dots += `<div class="am-dot ${i >= alumno.oportunidades ? 'used' : ''}"></div>`;
@@ -821,7 +784,7 @@ function renderAlumnoMonitor() {
     grid.innerHTML = html;
 
     // Update stats
-    const conectados = DEMO_ALUMNOS.filter(a => a.conectado).length;
+    const conectados = ALUMNOS_REGISTRADOS.filter(a => a.conectado).length;
     const conectadosEl = document.getElementById('aula-conectados');
     if (conectadosEl) conectadosEl.textContent = conectados;
 }
@@ -993,7 +956,7 @@ function startExamenTimer() {
 }
 
 function renderPregunta(index) {
-    const preguntas = DEMO_PREGUNTAS;
+    const preguntas = PREGUNTAS_BANCO;
     if (index < 0 || index >= preguntas.length) return;
 
     AppState.examenActual.preguntaActual = index;
@@ -1072,7 +1035,7 @@ function updatePreguntaNav() {
             btn.classList.add('active');
         }
         // Mark answered
-        const pregunta = DEMO_PREGUNTAS[i];
+        const pregunta = PREGUNTAS_BANCO[i];
         if (AppState.examenActual.respuestas[pregunta.num]) {
             btn.classList.add('answered');
         } else {
@@ -1087,7 +1050,7 @@ function goToQuestion(index) {
 
 function nextQuestion() {
     const current = AppState.examenActual.preguntaActual;
-    if (current < DEMO_PREGUNTAS.length - 1) {
+    if (current < PREGUNTAS_BANCO.length - 1) {
         renderPregunta(current + 1);
     }
 }
@@ -1108,7 +1071,7 @@ function finalizarExamen() {
     if (examenTimer) clearInterval(examenTimer);
 
     const answered = Object.keys(AppState.examenActual.respuestas).length;
-    const total = DEMO_PREGUNTAS.length;
+    const total = PREGUNTAS_BANCO.length;
 
     // Calculate mock grade
     const nota = Math.min(10, Math.round((answered / total) * 8 + Math.random() * 2));

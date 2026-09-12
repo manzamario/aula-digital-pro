@@ -422,27 +422,7 @@
                     <button onclick="toggleNotifications()">✕</button>
                 </div>
                 <div class="notif-list">
-                    <div class="notif-item unread">
-                        <span class="notif-icon">📝</span>
-                        <div class="notif-content">
-                            <p>Nuevo TP disponible: Ejercicios de Variables</p>
-                            <small>Hace 2 horas</small>
-                        </div>
-                    </div>
-                    <div class="notif-item unread">
-                        <span class="notif-icon">✅</span>
-                        <div class="notif-content">
-                            <p>Tu examen fue corregido - Nota: 8</p>
-                            <small>Hace 5 horas</small>
-                        </div>
-                    </div>
-                    <div class="notif-item">
-                        <span class="notif-icon">📚</span>
-                        <div class="notif-content">
-                            <p>Nuevo material: Introducción a Python</p>
-                            <small>Ayer</small>
-                        </div>
-                    </div>
+                    <p class="empty-state">No hay notificaciones.</p>
                 </div>
             </div>
 
@@ -451,7 +431,7 @@
             <!-- DASHBOARD DOCENTE -->
             <div id="view-dashboard-docente" class="view" style="display:none;">
                 <div class="dashboard-greeting">
-                    <h1>Buenos días, <span id="greeting-name">Profesor</span> 👋</h1>
+                    <h1>Buenos días 👋</h1>
                     <p>Panel de control de tus cursos y actividades</p>
                 </div>
 
@@ -459,28 +439,28 @@
                     <div class="stat-card stat-blue">
                         <div class="stat-icon">📚</div>
                         <div class="stat-info">
-                            <span class="stat-number" id="stat-cursos">4</span>
+                            <span class="stat-number">0</span>
                             <span class="stat-label">Cursos Activos</span>
                         </div>
                     </div>
                     <div class="stat-card stat-green">
                         <div class="stat-icon">👥</div>
                         <div class="stat-info">
-                            <span class="stat-number" id="stat-alumnos">128</span>
+                            <span class="stat-number">0</span>
                             <span class="stat-label">Alumnos Totales</span>
                         </div>
                     </div>
                     <div class="stat-card stat-orange">
                         <div class="stat-icon">📝</div>
                         <div class="stat-info">
-                            <span class="stat-number" id="stat-tp-pendientes">12</span>
+                            <span class="stat-number">0</span>
                             <span class="stat-label">TP para Corregir</span>
                         </div>
                     </div>
                     <div class="stat-card stat-purple">
                         <div class="stat-icon">📊</div>
                         <div class="stat-info">
-                            <span class="stat-number" id="stat-examenes">2</span>
+                            <span class="stat-number">0</span>
                             <span class="stat-label">Próximos Exámenes</span>
                         </div>
                     </div>
@@ -492,39 +472,8 @@
                             <h3>📋 Mis Cursos</h3>
                             <button class="btn btn-primary btn-sm" onclick="showModal('modal-nuevo-curso')">+ Nuevo</button>
                         </div>
-                        <div class="card-body" id="cursos-list">
-                            <div class="curso-item" onclick="selectCurso(1)">
-                                <div class="curso-color" style="background:#4f46e5;"></div>
-                                <div class="curso-info">
-                                    <h4>3° Año A</h4>
-                                    <p>Informática - 32 alumnos</p>
-                                </div>
-                                <span class="curso-arrow">→</span>
-                            </div>
-                            <div class="curso-item" onclick="selectCurso(2)">
-                                <div class="curso-color" style="background:#0891b2;"></div>
-                                <div class="curso-info">
-                                    <h4>4° Año B</h4>
-                                    <p>Informática - 28 alumnos</p>
-                                </div>
-                                <span class="curso-arrow">→</span>
-                            </div>
-                            <div class="curso-item" onclick="selectCurso(3)">
-                                <div class="curso-color" style="background:#059669;"></div>
-                                <div class="curso-info">
-                                    <h4>5° Año A</h4>
-                                    <p>Informática - 30 alumnos</p>
-                                </div>
-                                <span class="curso-arrow">→</span>
-                            </div>
-                            <div class="curso-item" onclick="selectCurso(4)">
-                                <div class="curso-color" style="background:#d97706;"></div>
-                                <div class="curso-info">
-                                    <h4>1° Año C</h4>
-                                    <p>Informática - 38 alumnos</p>
-                                </div>
-                                <span class="curso-arrow">→</span>
-                            </div>
+                        <div class="card-body">
+                            <p class="empty-state">No tenés cursos creados. Creá tu primer curso para comenzar.</p>
                         </div>
                     </div>
 
@@ -533,41 +482,45 @@
                             <h3>📅 Próximas Actividades</h3>
                         </div>
                         <div class="card-body">
-                            <div class="activity-item">
-                                <div class="activity-date">
-                                    <span class="day">15</span>
-                                    <span class="month">SEP</span>
-                                </div>
-                                <div class="activity-info">
-                                    <h4>Examen - 3°A</h4>
-                                    <p>Variables y Tipos de Datos</p>
-                                    <span class="badge badge-orange">En 3 días</span>
-                                </div>
-                            </div>
-                            <div class="activity-item">
-                                <div class="activity-date">
-                                    <span class="day">18</span>
-                                    <span class="month">SEP</span>
-                                </div>
-                                <div class="activity-info">
-                                    <h4>Entrega TP - 4°B</h4>
-                                    <p>Ejercicios de Funciones</p>
-                                    <span class="badge badge-blue">En 6 días</span>
-                                </div>
-                            </div>
-                            <div class="activity-item">
-                                <div class="activity-date">
-                                    <span class="day">20</span>
-                                    <span class="month">SEP</span>
-                                </div>
-                                <div class="activity-info">
-                                    <h4>Examen - 5°A</h4>
-                                    <p>Base de Datos SQL</p>
-                                    <span class="badge badge-purple">En 8 días</span>
-                                </div>
+                            <p class="empty-state">No hay actividades programadas.</p>
+                        </div>
+                    </div>
+
+                    <div class="card card-wide">
+                        <div class="card-header">
+                            <h3>⚡ Acciones Rápidas</h3>
+                        </div>
+                        <div class="card-body">
+                            <div class="quick-actions">
+                                <button class="quick-action" onclick="showView('view-asistencia')">
+                                    <span class="qa-icon">📋</span>
+                                    <span class="qa-text">Tomar Asistencia</span>
+                                </button>
+                                <button class="quick-action" onclick="showView('view-materiales')">
+                                    <span class="qa-icon">📤</span>
+                                    <span class="qa-text">Subir Material</span>
+                                </button>
+                                <button class="quick-action" onclick="showView('view-tp')">
+                                    <span class="qa-icon">📝</span>
+                                    <span class="qa-text">Crear TP</span>
+                                </button>
+                                <button class="quick-action" onclick="showView('view-examenes')">
+                                    <span class="qa-icon">📊</span>
+                                    <span class="qa-text">Crear Examen</span>
+                                </button>
+                                <button class="quick-action" onclick="showView('view-aula-controlada')">
+                                    <span class="qa-icon">🔒</span>
+                                    <span class="qa-text">Aula Controlada</span>
+                                </button>
+                                <button class="quick-action" onclick="showView('view-panel-realtime')">
+                                    <span class="qa-icon">📡</span>
+                                    <span class="qa-text">Panel Tiempo Real</span>
+                                </button>
                             </div>
                         </div>
                     </div>
+                </div>
+            </div>
 
                     <div class="card card-wide">
                         <div class="card-header">
@@ -616,21 +569,21 @@
                     <div class="stat-card stat-blue">
                         <div class="stat-icon">📚</div>
                         <div class="stat-info">
-                            <span class="stat-number">3</span>
+                            <span class="stat-number">0</span>
                             <span class="stat-label">Mis Cursos</span>
                         </div>
                     </div>
                     <div class="stat-card stat-orange">
                         <div class="stat-icon">📝</div>
                         <div class="stat-info">
-                            <span class="stat-number">2</span>
+                            <span class="stat-number">0</span>
                             <span class="stat-label">TP Pendientes</span>
                         </div>
                     </div>
                     <div class="stat-card stat-green">
                         <div class="stat-icon">⭐</div>
                         <div class="stat-info">
-                            <span class="stat-number">8.2</span>
+                            <span class="stat-number">0</span>
                             <span class="stat-label">Promedio</span>
                         </div>
                     </div>
@@ -640,12 +593,12 @@
                     <div class="oportunidades-card">
                         <div class="oportunidades-header">
                             <h3>🎯 Mis Oportunidades</h3>
-                            <span class="oportunidades-count" id="oportunidades-count">5</span>
+                            <span class="oportunidades-count" id="oportunidades-count">0</span>
                         </div>
                         <div class="oportunidades-bar">
-                            <div class="oportunidades-fill" id="oportunidades-fill" style="width:100%"></div>
+                            <div class="oportunidades-fill" id="oportunidades-fill" style="width:0%"></div>
                         </div>
-                        <p class="oportunidades-text" id="oportunidades-text">Todas tus oportunidades disponibles. ¡Mantenelas!</p>
+                        <p class="oportunidades-text" id="oportunidades-text">No hay datos de oportunidades disponibles.</p>
                     </div>
                 </div>
 
@@ -655,33 +608,7 @@
                             <h3>📝 Mis Trabajos Prácticos</h3>
                         </div>
                         <div class="card-body">
-                            <div class="tp-item">
-                                <div class="tp-status tp-pendiente">Pendiente</div>
-                                <div class="tp-info">
-                                    <h4>Ejercicios de Variables</h4>
-                                    <p>3°A - Informática</p>
-                                    <small>Entrega: 18/09/2026</small>
-                                </div>
-                                <button class="btn btn-primary btn-sm" onclick="showView('view-tp-alumno')">Entregar</button>
-                            </div>
-                            <div class="tp-item">
-                                <div class="tp-status tp-entregado">Entregado</div>
-                                <div class="tp-info">
-                                    <h4>Guía de Introducción a Python</h4>
-                                    <p>3°A - Informática</p>
-                                    <small>Entregado: 10/09/2026</small>
-                                </div>
-                                <button class="btn btn-outline btn-sm">Ver</button>
-                            </div>
-                            <div class="tp-item">
-                                <div class="tp-status tp-corregido">Corregido: 9</div>
-                                <div class="tp-info">
-                                    <h4>Algoritmos Básicos</h4>
-                                    <p>3°A - Informática</p>
-                                    <small>Corregido: 05/09/2026</small>
-                                </div>
-                                <button class="btn btn-outline btn-sm">Ver</button>
-                            </div>
+                            <p class="empty-state">No hay trabajos prácticos disponibles.</p>
                         </div>
                     </div>
 
@@ -690,28 +617,7 @@
                             <h3>📅 Próximas Evaluaciones</h3>
                         </div>
                         <div class="card-body">
-                            <div class="eval-item">
-                                <div class="eval-date">
-                                    <span class="day">15</span>
-                                    <span class="month">SEP</span>
-                                </div>
-                                <div class="eval-info">
-                                    <h4>Examen Parcial</h4>
-                                    <p>Variables y Tipos de Datos</p>
-                                    <span class="badge badge-orange">En 3 días</span>
-                                </div>
-                            </div>
-                            <div class="eval-item">
-                                <div class="eval-date">
-                                    <span class="day">22</span>
-                                    <span class="month">SEP</span>
-                                </div>
-                                <div class="eval-info">
-                                    <h4>Recuperatorio</h4>
-                                    <p>Introducción a la Programación</p>
-                                    <span class="badge badge-red">Recuperatorio</span>
-                                </div>
-                            </div>
+                            <p class="empty-state">No hay evaluaciones programadas.</p>
                         </div>
                     </div>
                 </div>
@@ -727,28 +633,28 @@
                     <div class="stat-card stat-blue">
                         <div class="stat-icon">👥</div>
                         <div class="stat-info">
-                            <span class="stat-number">12</span>
+                            <span class="stat-number">0</span>
                             <span class="stat-label">Docentes</span>
                         </div>
                     </div>
                     <div class="stat-card stat-green">
                         <div class="stat-icon">🎓</div>
                         <div class="stat-info">
-                            <span class="stat-number">512</span>
+                            <span class="stat-number">0</span>
                             <span class="stat-label">Alumnos</span>
                         </div>
                     </div>
                     <div class="stat-card stat-orange">
                         <div class="stat-icon">📚</div>
                         <div class="stat-info">
-                            <span class="stat-number">16</span>
+                            <span class="stat-number">0</span>
                             <span class="stat-label">Cursos</span>
                         </div>
                     </div>
                     <div class="stat-card stat-purple">
                         <div class="stat-icon">📤</div>
                         <div class="stat-info">
-                            <span class="stat-number">847</span>
+                            <span class="stat-number">0</span>
                             <span class="stat-label">Envíos WhatsApp</span>
                         </div>
                     </div>
@@ -760,25 +666,7 @@
                             <button class="btn btn-primary btn-sm" onclick="showModal('modal-nuevo-docente')">+ Nuevo</button>
                         </div>
                         <div class="card-body">
-                            <table class="data-table">
-                                <thead>
-                                    <tr><th>Nombre</th><th>Email</th><th>Cursos</th><th>Acciones</th></tr>
-                                </thead>
-                                <tbody>
-                                    <tr>
-                                        <td>Prof. García</td>
-                                        <td>garcia@escuela.edu</td>
-                                        <td>4</td>
-                                        <td><button class="btn btn-sm btn-outline">Editar</button></td>
-                                    </tr>
-                                    <tr>
-                                        <td>Prof. López</td>
-                                        <td>lopez@escuela.edu</td>
-                                        <td>3</td>
-                                        <td><button class="btn btn-sm btn-outline">Editar</button></td>
-                                    </tr>
-                                </tbody>
-                            </table>
+                            <p class="empty-state">No hay docentes registrados.</p>
                         </div>
                     </div>
                     <div class="card">
@@ -786,20 +674,7 @@
                             <h3>📊 Uso de WhatsApp</h3>
                         </div>
                         <div class="card-body">
-                            <div class="whatsapp-stats">
-                                <div class="ws-item">
-                                    <span class="ws-label">Enviados este mes</span>
-                                    <span class="ws-value">124</span>
-                                </div>
-                                <div class="ws-item">
-                                    <span class="ws-label">Costo estimado</span>
-                                    <span class="ws-value">$2.48 ARS</span>
-                                </div>
-                                <div class="ws-item">
-                                    <span class="ws-label">Errores</span>
-                                    <span class="ws-value ws-error">3</span>
-                                </div>
-                            </div>
+                            <p class="empty-state">No hay datos de uso de WhatsApp.</p>
                         </div>
                     </div>
                 </div>
@@ -885,42 +760,7 @@
                 </div>
 
                 <div class="materiales-grid" id="materiales-grid">
-                    <div class="material-card" onclick="viewMaterial(1)">
-                        <div class="material-type material-pdf">📄 PDF</div>
-                        <h4>Introducción a Python</h4>
-                        <p>Unidad 1 - Apuntes de clase</p>
-                        <div class="material-meta">
-                            <span>3°A</span>
-                            <span>12/09/2026</span>
-                        </div>
-                    </div>
-                    <div class="material-card" onclick="viewMaterial(2)">
-                        <div class="material-type material-video">🎬 Video</div>
-                        <h4>Variables y Tipos de Datos</h4>
-                        <p>Unidad 1 - Video explicativo</p>
-                        <div class="material-meta">
-                            <span>3°A</span>
-                            <span>10/09/2026</span>
-                        </div>
-                    </div>
-                    <div class="material-card" onclick="viewMaterial(3)">
-                        <div class="material-type material-text">📝 Texto</div>
-                        <h4>Guía de Ejercicios - Algoritmos</h4>
-                        <p>Unidad 2 - Guía práctica</p>
-                        <div class="material-meta">
-                            <span>4°B</span>
-                            <span>08/09/2026</span>
-                        </div>
-                    </div>
-                    <div class="material-card" onclick="viewMaterial(4)">
-                        <div class="material-type material-pdf">📄 PDF</div>
-                        <h4>Base de Datos SQL</h4>
-                        <p>Unidad 3 - Teoría completa</p>
-                        <div class="material-meta">
-                            <span>5°A</span>
-                            <span>05/09/2026</span>
-                        </div>
-                    </div>
+                    <p class="empty-state">No hay materiales subidos. Subí tu primer material para comenzar.</p>
                 </div>
             </div>
 
@@ -932,41 +772,14 @@
                 </div>
 
                 <div class="tp-tabs">
-                    <button class="tab active" onclick="switchTab(this, 'tp-pendientes')">Pendientes (5)</button>
-                    <button class="tab" onclick="switchTab(this, 'tp-entregados')">Entregados (8)</button>
-                    <button class="tab" onclick="switchTab(this, 'tp-corregidos')">Corregidos (12)</button>
+                    <button class="tab active" onclick="switchTab(this, 'tp-pendientes')">Pendientes (0)</button>
+                    <button class="tab" onclick="switchTab(this, 'tp-entregados')">Entregados (0)</button>
+                    <button class="tab" onclick="switchTab(this, 'tp-corregidos')">Corregidos (0)</button>
                 </div>
 
                 <div id="tp-pendientes" class="tab-content">
                     <div class="tp-list">
-                        <div class="tp-card">
-                            <div class="tp-card-header">
-                                <h4>Ejercicios de Variables</h4>
-                                <span class="badge badge-orange">3°A - Pendientes: 28/32</span>
-                            </div>
-                            <p>Resolver los ejercicios 1 al 15 del capítulo 2. Entrega en plataforma.</p>
-                            <div class="tp-card-footer">
-                                <span>📅 Entrega: 18/09/2026</span>
-                                <div>
-                                    <button class="btn btn-outline btn-sm" onclick="showView('view-tp-entregas')">Ver Entregas</button>
-                                    <button class="btn btn-primary btn-sm">Corregir</button>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="tp-card">
-                            <div class="tp-card-header">
-                                <h4>Guía de Funciones</h4>
-                                <span class="badge badge-orange">4°B - Pendientes: 22/28</span>
-                            </div>
-                            <p>Crear funciones que resuelvan los problemas planteados.</p>
-                            <div class="tp-card-footer">
-                                <span>📅 Entrega: 20/09/2026</span>
-                                <div>
-                                    <button class="btn btn-outline btn-sm">Ver Entregas</button>
-                                    <button class="btn btn-primary btn-sm">Corregir</button>
-                                </div>
-                            </div>
-                        </div>
+                        <p class="empty-state">No hay trabajos prácticos pendientes.</p>
                     </div>
                 </div>
                 <div id="tp-entregados" class="tab-content" style="display:none;">
@@ -985,40 +798,7 @@
                 </div>
 
                 <div class="examenes-grid">
-                    <div class="examen-card">
-                        <div class="examen-header">
-                            <h4>Examen Parcial 1°</h4>
-                            <span class="badge badge-green">Publicado</span>
-                        </div>
-                        <div class="examen-info">
-                            <p><strong>Curso:</strong> 3° Año A</p>
-                            <p><strong>Fecha:</strong> 15/09/2026</p>
-                            <p><strong>Cuatrimestre:</strong> 1° - Orden: 1°</p>
-                            <p><strong>Duración:</strong> 40 minutos</p>
-                            <p><strong>Preguntas:</strong> 15</p>
-                        </div>
-                        <div class="examen-actions">
-                            <button class="btn btn-outline btn-sm">Editar Preguntas</button>
-                            <button class="btn btn-primary btn-sm" onclick="showView('view-panel-realtime')">Ver en Vivo</button>
-                        </div>
-                    </div>
-                    <div class="examen-card">
-                        <div class="examen-header">
-                            <h4>Examen Parcial 1°</h4>
-                            <span class="badge badge-blue">Borrador</span>
-                        </div>
-                        <div class="examen-info">
-                            <p><strong>Curso:</strong> 5° Año A</p>
-                            <p><strong>Fecha:</strong> 20/09/2026</p>
-                            <p><strong>Cuatrimestre:</strong> 1° - Orden: 1°</p>
-                            <p><strong>Duración:</strong> 40 minutos</p>
-                            <p><strong>Preguntas:</strong> 10 (incompleto)</p>
-                        </div>
-                        <div class="examen-actions">
-                            <button class="btn btn-outline btn-sm">Editar</button>
-                            <button class="btn btn-primary btn-sm">Publicar</button>
-                        </div>
-                    </div>
+                    <p class="empty-state">No hay exámenes creados. Creá tu primer examen para comenzar.</p>
                 </div>
 
                 <div class="card" style="margin-top: 2rem;">
@@ -1027,32 +807,7 @@
                         <button class="btn btn-primary btn-sm" onclick="showModal('modal-nueva-pregunta')">+ Agregar Pregunta</button>
                     </div>
                     <div class="card-body">
-                        <div class="pregunta-item">
-                            <div class="pregunta-tipo tipo-multiple">Opción Múltiple</div>
-                            <div class="pregunta-content">
-                                <p><strong>P1:</strong> ¿Cuál es el tipo de dato de una variable que almacena "Hola"?</p>
-                                <div class="pregunta-opciones">
-                                    <span>a) int</span><span class="correct">b) string ✓</span><span>c) bool</span><span>d) float</span>
-                                </div>
-                            </div>
-                            <span class="pregunta-puntaje">2 pts</span>
-                        </div>
-                        <div class="pregunta-item">
-                            <div class="pregunta-tipo tipo-vf">V/F</div>
-                            <div class="pregunta-content">
-                                <p><strong>P2:</strong> Python es un lenguaje tipado estáticamente.</p>
-                                <span class="incorrect">Falso - Es tipado dinámicamente</span>
-                            </div>
-                            <span class="pregunta-puntaje">1 pt</span>
-                        </div>
-                        <div class="pregunta-item">
-                            <div class="pregunta-tipo tipo-corta">Respuesta Corta</div>
-                            <div class="pregunta-content">
-                                <p><strong>P3:</strong> ¿Cuál es la diferencia entre una lista y una tupla?</p>
-                                <small>Corrección manual</small>
-                            </div>
-                            <span class="pregunta-puntaje">3 pts</span>
-                        </div>
+                        <p class="empty-state">No hay preguntas en el banco. Agregá tu primera pregunta.</p>
                     </div>
                 </div>
             </div>
@@ -1101,16 +856,7 @@
                             <h3>🔄 Solicitudes de Reingreso</h3>
                         </div>
                         <div class="card-body" id="solicitudes-reingreso">
-                            <div class="solicitud-item">
-                                <div class="solicitud-info">
-                                    <strong>Pérez, Juan</strong> - 3°A
-                                    <small>Salió hace 2 minutos</small>
-                                </div>
-                                <div class="solicitud-actions">
-                                    <button class="btn btn-success btn-sm" onclick="autorizarReingreso(this, true)">✅ Autorizar</button>
-                                    <button class="btn btn-danger btn-sm" onclick="autorizarReingreso(this, false)">❌ Rechazar</button>
-                                </div>
-                            </div>
+                            <p class="empty-state">No hay solicitudes de reingreso pendientes.</p>
                         </div>
                     </div>
                 </div>
@@ -1135,8 +881,7 @@
                         </div>
                         <div class="card-body">
                             <div class="countdown-display-large">
-                                <span class="countdown-time" id="realtime-countdown">32:45</span>
-                                <p>Examen en curso - 15 alumnos</p>
+                                <p class="empty-state">No hay examen en curso.</p>
                             </div>
                         </div>
                     </div>
@@ -1146,23 +891,7 @@
                             <h3>📊 Progreso</h3>
                         </div>
                         <div class="card-body">
-                            <div class="progreso-stats">
-                                <div class="progreso-item">
-                                    <span class="prog-label">En examen</span>
-                                    <span class="prog-value">12</span>
-                                    <div class="prog-bar"><div class="prog-fill" style="width:80%;background:#10b981;"></div></div>
-                                </div>
-                                <div class="progreso-item">
-                                    <span class="prog-label">Terminaron</span>
-                                    <span class="prog-value">3</span>
-                                    <div class="prog-bar"><div class="prog-fill" style="width:20%;background:#3b82f6;"></div></div>
-                                </div>
-                                <div class="progreso-item">
-                                    <span class="prog-label">Sin conexión</span>
-                                    <span class="prog-value">0</span>
-                                    <div class="prog-bar"><div class="prog-fill" style="width:0%;background:#ef4444;"></div></div>
-                                </div>
-                            </div>
+                            <p class="empty-state">No hay datos de progreso disponibles.</p>
                         </div>
                     </div>
                 </div>
@@ -1184,25 +913,7 @@
                             </thead>
                             <tbody>
                                 <tr>
-                                    <td>García, Ana</td>
-                                    <td><span class="countdown-mini">28:15</span></td>
-                                    <td>12/15</td>
-                                    <td><span class="badge badge-green">En curso</span></td>
-                                    <td><button class="btn btn-sm btn-outline">Ver</button></td>
-                                </tr>
-                                <tr>
-                                    <td>López, Carlos</td>
-                                    <td><span class="countdown-mini">15:30</span></td>
-                                    <td>8/15</td>
-                                    <td><span class="badge badge-green">En curso</span></td>
-                                    <td><button class="btn btn-sm btn-outline">Ver</button></td>
-                                </tr>
-                                <tr>
-                                    <td>Martínez, Sofía</td>
-                                    <td><span class="countdown-mini done">00:00</span></td>
-                                    <td>15/15</td>
-                                    <td><span class="badge badge-blue">Finalizado</span></td>
-                                    <td><button class="btn btn-sm btn-outline">Corregir</button></td>
+                                    <td colspan="5"><p class="empty-state">No hay alumnos en tiempo real.</p></td>
                                 </tr>
                             </tbody>
                         </table>
@@ -1214,8 +925,8 @@
             <div id="view-examen-alumno" class="view" style="display:none;">
                 <div class="examen-header-bar">
                     <div class="examen-header-left">
-                        <h3>Examen Parcial - Variables y Tipos de Datos</h3>
-                        <p>3° Año A - Informática</p>
+                        <h3 id="examen-titulo">Examen</h3>
+                        <p id="examen-curso-info"></p>
                     </div>
                     <div class="examen-timer" id="examen-timer">
                         <span class="timer-icon">⏱️</span>
@@ -1232,16 +943,6 @@
                     <div class="examen-sidebar">
                         <h4>Preguntas</h4>
                         <div class="pregunta-nav" id="pregunta-nav">
-                            <button class="pregunta-btn active" onclick="goToQuestion(0)">1</button>
-                            <button class="pregunta-btn" onclick="goToQuestion(1)">2</button>
-                            <button class="pregunta-btn" onclick="goToQuestion(2)">3</button>
-                            <button class="pregunta-btn answered" onclick="goToQuestion(3)">4</button>
-                            <button class="pregunta-btn" onclick="goToQuestion(4)">5</button>
-                            <button class="pregunta-btn" onclick="goToQuestion(5)">6</button>
-                            <button class="pregunta-btn" onclick="goToQuestion(6)">7</button>
-                            <button class="pregunta-btn" onclick="goToQuestion(7)">8</button>
-                            <button class="pregunta-btn answered" onclick="goToQuestion(8)">9</button>
-                            <button class="pregunta-btn" onclick="goToQuestion(9)">10</button>
                         </div>
                         <div class="examen-legend">
                             <span><span class="legend-dot active"></span> Actual</span>
@@ -1252,36 +953,7 @@
 
                     <div class="examen-main">
                         <div class="pregunta-container" id="pregunta-container">
-                            <div class="pregunta-header">
-                                <span class="pregunta-num">Pregunta 1 de 10</span>
-                                <span class="pregunta-tipo-badge">Opción Múltiple</span>
-                                <span class="pregunta-pts">2 puntos</span>
-                            </div>
-                            <div class="pregunta-enunciado">
-                                <p>¿Cuál es el tipo de dato correcto para almacenar el valor 3.14 en Python?</p>
-                            </div>
-                            <div class="opciones-container">
-                                <label class="opcion-item">
-                                    <input type="radio" name="p1" value="a">
-                                    <span class="opcion-radio"></span>
-                                    <span class="opcion-texto">a) int</span>
-                                </label>
-                                <label class="opcion-item">
-                                    <input type="radio" name="p1" value="b">
-                                    <span class="opcion-radio"></span>
-                                    <span class="opcion-texto">b) string</span>
-                                </label>
-                                <label class="opcion-item">
-                                    <input type="radio" name="p1" value="c">
-                                    <span class="opcion-radio"></span>
-                                    <span class="opcion-texto">c) float</span>
-                                </label>
-                                <label class="opcion-item">
-                                    <input type="radio" name="p1" value="d">
-                                    <span class="opcion-radio"></span>
-                                    <span class="opcion-texto">d) bool</span>
-                                </label>
-                            </div>
+                            <p class="empty-state">No hay examen en curso.</p>
                         </div>
 
                         <div class="examen-nav-buttons">
@@ -1305,30 +977,7 @@
                 </div>
 
                 <div class="materiales-grid">
-                    <div class="material-card" onclick="openMaterialViewer()">
-                        <div class="material-type material-pdf">📄 PDF</div>
-                        <h4>Introducción a Python</h4>
-                        <p>Unidad 1 - Apuntes completos de clase</p>
-                        <div class="material-meta">
-                            <span>3°A</span>
-                            <span>12/09/2026</span>
-                        </div>
-                        <div class="material-status">
-                            <span class="badge badge-green">✓ Descargado</span>
-                        </div>
-                    </div>
-                    <div class="material-card" onclick="openMaterialViewer()">
-                        <div class="material-type material-video">🎬 Video</div>
-                        <h4>Variables y Tipos de Datos</h4>
-                        <p>Unidad 1 - Video explicativo (15 min)</p>
-                        <div class="material-meta">
-                            <span>3°A</span>
-                            <span>10/09/2026</span>
-                        </div>
-                        <div class="material-status">
-                            <span class="badge badge-blue">▶ Ver</span>
-                        </div>
-                    </div>
+                    <p class="empty-state">No hay materiales disponibles.</p>
                 </div>
             </div>
 
@@ -1339,64 +988,7 @@
                 </div>
 
                 <div class="tp-list-alumno">
-                    <div class="tp-card-alumno">
-                        <div class="tp-card-status tp-pendiente">Pendiente</div>
-                        <h4>Ejercicios de Variables</h4>
-                        <p><strong>3°A - Informática</strong></p>
-                        <p class="tp-consigna">Resolver los ejercicios 1 al 15 del capítulo 2. Puedes entregar archivo o escribir la respuesta directamente.</p>
-                        <div class="tp-entrega-info">
-                            <span>📅 Fecha de entrega: 18/09/2026</span>
-                        </div>
-                        <div class="tp-entrega-form" id="tp-entrega-form">
-                            <div class="form-group">
-                                <label>Opción de entrega:</label>
-                                <div class="entrega-options">
-                                    <label class="opcion-entrega">
-                                        <input type="radio" name="tp-entrega-tipo" value="archivo" checked onchange="toggleEntregaTipo('archivo')">
-                                        <span>📎 Subir Archivo</span>
-                                    </label>
-                                    <label class="opcion-entrega">
-                                        <input type="radio" name="tp-entrega-tipo" value="texto" onchange="toggleEntregaTipo('texto')">
-                                        <span>✏️ Escribir Respuesta</span>
-                                    </label>
-                                </div>
-                            </div>
-                            <div id="entrega-archivo" class="entrega-option">
-                                <div class="file-upload-area" onclick="document.getElementById('tp-file').click()">
-                                    <input type="file" id="tp-file" hidden accept=".pdf,.doc,.docx,.txt,.png,.jpg">
-                                    <div class="upload-icon">📤</div>
-                                    <p>Arrastrá tu archivo acá o hacé clic para seleccionar</p>
-                                    <small>PDF, DOC, TXT, PNG, JPG - Máx 10MB</small>
-                                </div>
-                            </div>
-                            <div id="entrega-texto" class="entrega-option" style="display:none;">
-                                <textarea class="form-textarea" rows="8" placeholder="Escribí tu respuesta acá..."></textarea>
-                            </div>
-                            <button class="btn btn-primary" onclick="entregarTP()">📤 Entregar Trabajo</button>
-                        </div>
-                    </div>
-
-                    <div class="tp-card-alumno tp-entregado-card">
-                        <div class="tp-card-status tp-entregado">Entregado</div>
-                        <h4>Guía de Introducción a Python</h4>
-                        <p><strong>3°A - Informática</strong></p>
-                        <p class="tp-consigna">Completar la guía de ejercicios básicos de Python.</p>
-                        <div class="tp-entrega-info">
-                            <span>📅 Entregado: 10/09/2026</span>
-                            <span class="badge badge-blue">En revisión</span>
-                        </div>
-                    </div>
-
-                    <div class="tp-card-alumno tp-corregido-card">
-                        <div class="tp-card-status tp-corregido">Corregido: 9/10</div>
-                        <h4>Algoritmos Básicos</h4>
-                        <p><strong>3°A - Informática</strong></p>
-                        <div class="tp-resultado">
-                            <p><strong>Nota:</strong> 9/10</p>
-                            <p><strong>Comentario:</strong> Muy buen trabajo. Algunas respuestas necesitan más detalle.</p>
-                            <button class="btn btn-outline btn-sm">📄 Ver Devolución</button>
-                        </div>
-                    </div>
+                    <p class="empty-state">No hay trabajos prácticos disponibles.</p>
                 </div>
             </div>
 
@@ -1408,11 +1000,11 @@
 
                 <div class="notas-summary">
                     <div class="nota-promedio">
-                        <span class="nota-valor">8.2</span>
+                        <span class="nota-valor">0</span>
                         <span class="nota-label">Promedio General</span>
                     </div>
                     <div class="nota-aprobado">
-                        <span class="badge badge-green badge-lg">APROBADO</span>
+                        <span class="badge badge-orange badge-lg">SIN NOTAS</span>
                     </div>
                 </div>
 
@@ -1430,36 +1022,7 @@
                         </thead>
                         <tbody>
                             <tr>
-                                <td><strong>Informática</strong></td>
-                                <td>8</td>
-                                <td>9</td>
-                                <td>-</td>
-                                <td><strong>8.5</strong></td>
-                                <td><span class="badge badge-green">Aprobado</span></td>
-                            </tr>
-                            <tr>
-                                <td><strong>Matemática</strong></td>
-                                <td>6</td>
-                                <td>7</td>
-                                <td>-</td>
-                                <td><strong>6.5</strong></td>
-                                <td><span class="badge badge-green">Aprobado</span></td>
-                            </tr>
-                            <tr>
-                                <td><strong>Lengua</strong></td>
-                                <td>4</td>
-                                <td>-</td>
-                                <td>7</td>
-                                <td><strong>7.0</strong></td>
-                                <td><span class="badge badge-green">Aprobado</span></td>
-                            </tr>
-                            <tr>
-                                <td><strong>Inglés</strong></td>
-                                <td>5</td>
-                                <td>-</td>
-                                <td>Pend.</td>
-                                <td><strong>-</strong></td>
-                                <td><span class="badge badge-orange">Pendiente</span></td>
+                                <td colspan="6"><p class="empty-state">No hay notas disponibles.</p></td>
                             </tr>
                         </tbody>
                     </table>
@@ -1508,18 +1071,7 @@
                 </div>
 
                 <div class="integradores-list" id="integradores-list">
-                    <div class="integrador-card">
-                        <div class="integrador-header">
-                            <span class="integrador-tipo tipo-a">Tipo A</span>
-                            <span class="badge badge-orange">Asignado</span>
-                        </div>
-                        <h4>Trabajo Integrador - Algoritmos y Estructuras de Datos</h4>
-                        <p>Resolver los problemas planteados en papel. Entregar presencialmente al docente.</p>
-                        <div class="integrador-footer">
-                            <span>📅 Fecha límite: 25/09/2026</span>
-                            <span>🎯 Recupera: 3 oportunidades</span>
-                        </div>
-                    </div>
+                    <p class="empty-state">No tenés trabajos integradores asignados.</p>
                 </div>
             </div>
 
@@ -1538,28 +1090,28 @@
                     <div class="stat-card stat-blue">
                         <div class="stat-icon">📊</div>
                         <div class="stat-info">
-                            <span class="stat-number">7.4</span>
+                            <span class="stat-number">0</span>
                             <span class="stat-label">Promedio General</span>
                         </div>
                     </div>
                     <div class="stat-card stat-green">
                         <div class="stat-icon">✅</div>
                         <div class="stat-info">
-                            <span class="stat-number">85%</span>
+                            <span class="stat-number">0%</span>
                             <span class="stat-label">Aprobados</span>
                         </div>
                     </div>
                     <div class="stat-card stat-orange">
                         <div class="stat-icon">📋</div>
                         <div class="stat-info">
-                            <span class="stat-number">92%</span>
+                            <span class="stat-number">0%</span>
                             <span class="stat-label">Asistencia</span>
                         </div>
                     </div>
                     <div class="stat-card stat-purple">
                         <div class="stat-icon">📝</div>
                         <div class="stat-info">
-                            <span class="stat-number">28</span>
+                            <span class="stat-number">0</span>
                             <span class="stat-label">TP Entregados</span>
                         </div>
                     </div>
@@ -1571,43 +1123,7 @@
                             <h3>📈 Distribución de Notas - Examen 1°</h3>
                         </div>
                         <div class="card-body">
-                            <div class="chart-bars">
-                                <div class="chart-bar-item">
-                                    <span class="bar-label">10</span>
-                                    <div class="bar-track"><div class="bar-fill" style="width:5%"></div></div>
-                                    <span class="bar-count">2</span>
-                                </div>
-                                <div class="chart-bar-item">
-                                    <span class="bar-label">9</span>
-                                    <div class="bar-track"><div class="bar-fill" style="width:15%"></div></div>
-                                    <span class="bar-count">6</span>
-                                </div>
-                                <div class="chart-bar-item">
-                                    <span class="bar-label">8</span>
-                                    <div class="bar-track"><div class="bar-fill" style="width:25%"></div></div>
-                                    <span class="bar-count">10</span>
-                                </div>
-                                <div class="chart-bar-item">
-                                    <span class="bar-label">7</span>
-                                    <div class="bar-track"><div class="bar-fill" style="width:20%"></div></div>
-                                    <span class="bar-count">8</span>
-                                </div>
-                                <div class="chart-bar-item">
-                                    <span class="bar-label">6</span>
-                                    <div class="bar-track"><div class="bar-fill" style="width:15%"></div></div>
-                                    <span class="bar-count">6</span>
-                                </div>
-                                <div class="chart-bar-item">
-                                    <span class="bar-label">4-5</span>
-                                    <div class="bar-track"><div class="bar-fill bar-red" style="width:15%"></div></div>
-                                    <span class="bar-count">6</span>
-                                </div>
-                                <div class="chart-bar-item">
-                                    <span class="bar-label">1-3</span>
-                                    <div class="bar-track"><div class="bar-fill bar-red" style="width:5%"></div></div>
-                                    <span class="bar-count">2</span>
-                                </div>
-                            </div>
+                            <p class="empty-state">No hay datos de distribución de notas.</p>
                         </div>
                     </div>
 
@@ -1616,24 +1132,7 @@
                             <h3>🔄 Recuperatorios</h3>
                         </div>
                         <div class="card-body">
-                            <div class="recup-stats">
-                                <div class="recup-item">
-                                    <span>Disponibles</span>
-                                    <strong>18</strong>
-                                </div>
-                                <div class="recup-item">
-                                    <span>Rindieron</span>
-                                    <strong>8</strong>
-                                </div>
-                                <div class="recup-item">
-                                    <span>Aprobados</span>
-                                    <strong class="text-green">5</strong>
-                                </div>
-                                <div class="recup-item">
-                                    <span>Desaprobados</span>
-                                    <strong class="text-red">3</strong>
-                                </div>
-                            </div>
+                            <p class="empty-state">No hay datos de recuperatorios.</p>
                         </div>
                     </div>
                 </div>
