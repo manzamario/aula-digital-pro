@@ -47,9 +47,31 @@ let ALUMNOS_REGISTRADOS = [];
 let PREGUNTAS_BANCO = [];
 
 // ============================================
+// PERSISTENCIA (localStorage)
+// ============================================
+function saveUsers() {
+    localStorage.setItem('aulaUsers', JSON.stringify({ docente: USERS.docente, alumno: USERS.alumno }));
+}
+function saveAlumnos() {
+    localStorage.setItem('aulaAlumnos', JSON.stringify(ALUMNOS_REGISTRADOS));
+}
+function loadPersistedData() {
+    try {
+        const u = JSON.parse(localStorage.getItem('aulaUsers'));
+        if (u) {
+            if (u.docente) USERS.docente = u.docente;
+            if (u.alumno) USERS.alumno = u.alumno;
+        }
+        const a = JSON.parse(localStorage.getItem('aulaAlumnos'));
+        if (a) ALUMNOS_REGISTRADOS = a;
+    } catch(e) {}
+}
+
+// ============================================
 // SPLASH SCREEN
 // ============================================
 function initApp() {
+    loadPersistedData();
     setTimeout(() => {
         const splash = document.getElementById('splash-screen');
         if (splash) {
@@ -324,10 +346,16 @@ function initViewContent(viewId) {
 document.getElementById('login-form-docente')?.addEventListener('submit', function(e) {
     e.preventDefault();
     const email = document.getElementById('login-docente-email').value;
+    const password = document.getElementById('login-docente-password').value;
     const user = USERS.docente;
 
     if (!user || user.email !== email) {
         showToast('No se encontró una cuenta de docente con ese email. Registrate primero.', 'error');
+        return;
+    }
+
+    if (user.password !== password) {
+        showToast('Contraseña incorrecta', 'error');
         return;
     }
 
@@ -346,10 +374,16 @@ document.getElementById('login-form-docente')?.addEventListener('submit', functi
 document.getElementById('login-form-alumno')?.addEventListener('submit', function(e) {
     e.preventDefault();
     const email = document.getElementById('login-alumno-email').value;
+    const password = document.getElementById('login-alumno-password').value;
     const alumno = ALUMNOS_REGISTRADOS.find(a => a.email === email || a.dni === email);
 
     if (!alumno) {
         showToast('No se encontró una cuenta con ese email/DNI. Registrate primero.', 'error');
+        return;
+    }
+
+    if (alumno.password !== password) {
+        showToast('Contraseña incorrecta', 'error');
         return;
     }
 
@@ -471,7 +505,9 @@ document.getElementById('register-docente-form')?.addEventListener('submit', fun
         escuelaActual: null
     };
 
+    newUser.password = password;
     USERS.docente = newUser;
+    saveUsers();
 
     showToast(`¡Cuenta creada! Bienvenido, Prof. ${apellido}`, 'success');
 
@@ -482,6 +518,51 @@ document.getElementById('register-docente-form')?.addEventListener('submit', fun
         newUser.escuelaActual = newUser.escuelas[0];
         showApp('docente');
     }
+});
+
+// ============================================
+// REGISTRO - ALUMNO
+// ============================================
+document.getElementById('register-form')?.addEventListener('submit', function(e) {
+    e.preventDefault();
+
+    const password = document.getElementById('reg-password').value;
+    const passwordConfirm = document.getElementById('reg-password-confirm').value;
+
+    if (password !== passwordConfirm) {
+        showToast('Las contraseñas no coinciden', 'error');
+        return;
+    }
+
+    if (password.length < 8) {
+        showToast('La contraseña debe tener al menos 8 caracteres', 'error');
+        return;
+    }
+
+    const newAlumno = {
+        id: Date.now(),
+        nombre: document.getElementById('reg-nombre').value,
+        apellido: document.getElementById('reg-apellido').value,
+        edad: document.getElementById('reg-edad').value,
+        dni: document.getElementById('reg-dni').value,
+        curso: document.getElementById('reg-curso').value,
+        division: document.getElementById('reg-division').value,
+        escuela: document.getElementById('reg-escuela').value,
+        whatsapp: document.getElementById('reg-whatsapp').value,
+        email: document.getElementById('reg-email').value,
+        password: password,
+        conectado: false,
+        calificaciones: [],
+        trabajosEntregados: []
+    };
+
+    ALUMNOS_REGISTRADOS.push(newAlumno);
+    USERS.alumno = newAlumno;
+    saveAlumnos();
+    saveUsers();
+
+    showToast(`¡Cuenta creada! Bienvenido, ${newAlumno.nombre}`, 'success');
+    showApp('alumno');
 });
 
 // ============================================
