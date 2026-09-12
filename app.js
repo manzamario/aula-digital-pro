@@ -45,33 +45,6 @@ const USERS = {
 
 let ALUMNOS_REGISTRADOS = [];
 let PREGUNTAS_BANCO = [];
-    },
-    {
-        num: 6, tipo: 'multiple', tipoLabel: 'Opción Múltiple', puntos: 2,
-        enunciado: '¿Qué función se usa para obtener la longitud de una lista en Python?',
-        opciones: ['a) length()', 'b) size()', 'c) len()', 'd) count()']
-    },
-    {
-        num: 7, tipo: 'corta', tipoLabel: 'Respuesta Corta', puntos: 3,
-        enunciado: 'Escribí un programa que imprima "Hola Mundo" en Python.',
-        opciones: []
-    },
-    {
-        num: 8, tipo: 'multiple', tipoLabel: 'Opción Múltiple', puntos: 2,
-        enunciado: '¿Cuál es el resultado de: print(type(5))?',
-        opciones: ['a) <class \'str\'>', 'b) <class \'int\'>', 'c) <class \'float\'>', 'd) <class \'bool\'>']
-    },
-    {
-        num: 9, tipo: 'vf', tipoLabel: 'Verdadero / Falso', puntos: 1,
-        enunciado: 'Una función en Python se define con la palabra clave "function".',
-        opciones: ['Verdadero', 'Falso']
-    },
-    {
-        num: 10, tipo: 'multiple', tipoLabel: 'Opción Múltiple', puntos: 2,
-        enunciado: '¿Cuál de las siguientes es una forma correcta de crear una lista en Python?',
-        opciones: ['a) lista = (1, 2, 3)', 'b) lista = [1, 2, 3]', 'c) lista = {1, 2, 3}', 'd) lista = 1, 2, 3']
-    }
-];
 
 // ============================================
 // SPLASH SCREEN
