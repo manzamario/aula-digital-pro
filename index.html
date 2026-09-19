@@ -66,8 +66,8 @@
                     </div>
                     <span class="welcome-card-btn">Ingresar como Alumno →</span>
             </div>
-            <div style="text-align:center;margin-top:1.5rem;">
-                <a href="#" onclick="showScreen('screen-login-admin')" style="font-size:0.8rem;color:#94a3b8;text-decoration:none;">⚙️ Admin</a>
+            <div class="welcome-admin-link">
+                <a href="#" onclick="showScreen('screen-login-admin')">⚙️ Admin</a>
             </div>
         </div>
     </div>
@@ -185,7 +185,7 @@
                 <h2>Recuperar Contraseña</h2>
                 <p>Ingresá tu email y te enviaremos las instrucciones</p>
             </div>
-            <form class="form-vertical">
+            <form id="forgot-form-docente" class="form-vertical">
                 <div class="form-group">
                     <label>Email</label>
                     <input type="email" placeholder="tu@email.com" required>
@@ -296,8 +296,16 @@
                 <div class="form-group">
                     <label>Contraseña *</label>
                     <div class="password-input">
-                        <input type="password" id="reg-password" required placeholder="Mínimo 8 caracteres" minlength="8" autocomplete="new-password">
+                        <input type="password" id="reg-password" required placeholder="Mínimo 8 caracteres" minlength="8" autocomplete="new-password" oninput="updatePasswordStrength('reg-password', 'reg-strength')">
                         <button type="button" class="toggle-password" onclick="togglePassword('reg-password')">👁</button>
+                    </div>
+                    <div class="password-strength" id="reg-strength">
+                        <div class="strength-bar"></div>
+                        <div class="strength-bar"></div>
+                        <div class="strength-bar"></div>
+                        <div class="strength-bar"></div>
+                        <div class="strength-bar"></div>
+                        <span class="password-strength-text"></span>
                     </div>
                 </div>
                 <div class="form-group">
@@ -322,7 +330,7 @@
                 <h2>Recuperar Contraseña</h2>
                 <p>Ingresá tu email y te enviaremos las instrucciones</p>
             </div>
-            <form class="form-vertical">
+            <form id="forgot-form-alumno" class="form-vertical">
                 <div class="form-group">
                     <label>Email</label>
                     <input type="email" placeholder="tu@email.com" required>
@@ -395,7 +403,7 @@
                     <div class="user-avatar">D</div>
                     <div class="user-details">
                         <span class="user-name" id="sidebar-user-name">Docente</span>
-                        <span class="user-role" id="sidebar-user-role"> Rol</span>
+                        <span class="user-role" id="sidebar-user-role">Rol</span>
                     </div>
                 </div>
                 <button class="btn btn-logout" onclick="logout()">Cerrar Sesión</button>
@@ -517,42 +525,6 @@
                                     <span class="qa-text">Aula Controlada</span>
                                 </button>
                                 <button class="quick-action" onclick="showView('view-panel-realtime')">
-                                    <span class="qa-icon">📡</span>
-                                    <span class="qa-text">Panel Tiempo Real</span>
-                                </button>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-                    <div class="card card-wide">
-                        <div class="card-header">
-                            <h3>⚡ Acciones Rápidas</h3>
-                        </div>
-                        <div class="card-body">
-                            <div class="quick-actions">
-                                <button class="quick-action" onclick="showScreen('app-container'); showView('view-asistencia');">
-                                    <span class="qa-icon">📋</span>
-                                    <span class="qa-text">Tomar Asistencia</span>
-                                </button>
-                                <button class="quick-action" onclick="showScreen('app-container'); showView('view-materiales');">
-                                    <span class="qa-icon">📤</span>
-                                    <span class="qa-text">Subir Material</span>
-                                </button>
-                                <button class="quick-action" onclick="showScreen('app-container'); showView('view-tp');">
-                                    <span class="qa-icon">📝</span>
-                                    <span class="qa-text">Crear TP</span>
-                                </button>
-                                <button class="quick-action" onclick="showScreen('app-container'); showView('view-examenes');">
-                                    <span class="qa-icon">📊</span>
-                                    <span class="qa-text">Crear Examen</span>
-                                </button>
-                                <button class="quick-action" onclick="showScreen('app-container'); showView('view-aula-controlada');">
-                                    <span class="qa-icon">🔒</span>
-                                    <span class="qa-text">Aula Controlada</span>
-                                </button>
-                                <button class="quick-action" onclick="showScreen('app-container'); showView('view-panel-realtime');">
                                     <span class="qa-icon">📡</span>
                                     <span class="qa-text">Panel Tiempo Real</span>
                                 </button>
@@ -1519,6 +1491,6 @@
         </div>
     </div>
 
-    <script src="app.js?v=20260912b"></script>
+    <script src="app.js?v=2.0.0"></script>
 </body>
 </html>
