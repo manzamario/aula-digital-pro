@@ -503,6 +503,10 @@
                         </div>
                         <div class="card-body">
                             <div class="quick-actions">
+                                <button class="quick-action" onclick="showView('view-gestionar-alumnos')">
+                                    <span class="qa-icon">👥</span>
+                                    <span class="qa-text">Gestionar Alumnos</span>
+                                </button>
                                 <button class="quick-action" onclick="showView('view-asistencia')">
                                     <span class="qa-icon">📋</span>
                                     <span class="qa-text">Tomar Asistencia</span>
@@ -734,6 +738,67 @@
                         <div class="card-header"><h3>📅 Historial de Asistencia</h3></div>
                         <div class="card-body"><div id="asistencia-historial"><p class="empty-state">No hay registros anteriores.</p></div></div>
                     </div>
+                </div>
+            </div>
+
+            <!-- ==================== GESTIÓN ALUMNOS POR CURSO ==================== -->
+            <div id="view-gestionar-alumnos" class="view" style="display:none;">
+                <div class="view-header">
+                    <h2>👥 Gestionar Alumnos por Curso</h2>
+                    <div class="view-actions">
+                        <select id="ga-curso-select" class="form-select" onchange="cargarAlumnosCurso()">
+                            <option value="">Seleccioná un curso</option>
+                        </select>
+                    </div>
+                </div>
+                <div id="ga-content">
+                    <div class="card">
+                        <div class="card-body">
+                            <p class="empty-state">Seleccioná un curso para gestionar sus alumnos.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Modal: Importar CSV -->
+            <div class="modal modal-lg" id="modal-importar-csv" onclick="event.stopPropagation()" style="display:none;">
+                <div class="modal-header"><h3>📤 Importar Alumnos (CSV)</h3><button class="modal-close" onclick="closeAllModals()">✕</button></div>
+                <div class="modal-body">
+                    <div class="form-group">
+                        <label>Formato esperado del CSV:</label>
+                        <div style="background:var(--bg-secondary);padding:12px;border-radius:8px;font-family:monospace;font-size:0.85rem;margin:8px 0;">
+                            Apellido;Nombre;DNI<br>Garcia;Lucia;45123456<br>Martinez;Pedro;46789012
+                        </div>
+                        <small class="form-help">Separador: punto y coma (;). Primera fila omitida si contiene encabezados.</small>
+                    </div>
+                    <div class="form-group">
+                        <label>Seleccionar archivo CSV:</label>
+                        <input type="file" id="csv-file-input" accept=".csv,.txt" onchange="previewCSV(this)" style="display:none;">
+                        <button class="btn btn-outline" onclick="document.getElementById('csv-file-input').click()">📁 Elegir archivo</button>
+                    </div>
+                    <div id="csv-preview" style="display:none;margin-top:1rem;"></div>
+                </div>
+                <div class="modal-footer">
+                    <button class="btn btn-outline" onclick="closeAllModals()">Cancelar</button>
+                    <button class="btn btn-primary" id="btn-confirmar-csv" style="display:none;" onclick="confirmarImportacionCSV()">Importar Alumnos</button>
+                </div>
+            </div>
+
+            <!-- Modal: Agregar Alumno Manual -->
+            <div class="modal" id="modal-agregar-alumno-curso" onclick="event.stopPropagation()" style="display:none;">
+                <div class="modal-header"><h3>➕ Agregar Alumno</h3><button class="modal-close" onclick="closeAllModals()">✕</button></div>
+                <div class="modal-body">
+                    <form id="form-agregar-alumno-curso">
+                        <div class="form-row">
+                            <div class="form-group"><label>Apellido *</label><input type="text" id="ga-alumno-apellido" required placeholder="Apellido"></div>
+                            <div class="form-group"><label>Nombre *</label><input type="text" id="ga-alumno-nombre" required placeholder="Nombre"></div>
+                        </div>
+                        <div class="form-group"><label>DNI</label><input type="text" id="ga-alumno-dni" placeholder="Número de documento"></div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button class="btn btn-outline" onclick="closeAllModals()">Cancelar</button>
+                    <button class="btn btn-primary" onclick="agregarAlumnoManual()">Agregar</button>
                 </div>
             </div>
 
