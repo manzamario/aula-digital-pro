@@ -149,6 +149,44 @@ function loadPersistedData() {
 function savePreguntas() { safeSet('aulaPreguntas', PREGUNTAS_BANCO); }
 
 // ============================================
+// ADMIN — RESET PASSWORD
+// ============================================
+function showResetPassword(type, id, nombre) {
+    document.getElementById('reset-user-type').value = type;
+    document.getElementById('reset-user-id').value = id;
+    document.getElementById('reset-user-name').textContent = nombre;
+    document.getElementById('reset-new-password').value = '';
+    showModal('modal-reset-password');
+}
+
+function aplicarResetPassword() {
+    const type = document.getElementById('reset-user-type').value;
+    const id = parseInt(document.getElementById('reset-user-id').value);
+    const newPassword = document.getElementById('reset-new-password').value;
+
+    if (newPassword.length < 8) {
+        showToast('La contraseña debe tener al menos 8 caracteres', 'error');
+        return;
+    }
+
+    const hash = simpleHash(newPassword);
+
+    if (type === 'docente' && USERS.docente && USERS.docente.id === id) {
+        USERS.docente.passwordHash = hash;
+        saveUsers();
+    } else if (type === 'alumno') {
+        const alumno = ALUMNOS_REGISTRADOS.find(a => a.id === id);
+        if (alumno) {
+            alumno.passwordHash = hash;
+            saveAlumnos();
+        }
+    }
+
+    closeAllModals();
+    showToast('Contraseña restablecida correctamente', 'success');
+}
+
+// ============================================
 // SPLASH SCREEN
 // ============================================
 function initApp() {
@@ -232,9 +270,10 @@ function populateAdminDashboard() {
             <td>${esc(d.materia || '-')}</td>
             <td>${escuelasStr}</td>
             <td><span class="badge-activo">Activo</span></td>
+            <td><button class="btn btn-sm btn-outline" onclick="showResetPassword('docente', ${d.id}, '${esc(d.nombre)} ${esc(d.apellido)}')">🔑 Reset</button></td>
         </tr>`;
     } else {
-        docBody.innerHTML = '<tr><td colspan="7" class="empty-state">No hay docentes registrados</td></tr>';
+        docBody.innerHTML = '<tr><td colspan="8" class="empty-state">No hay docentes registrados</td></tr>';
     }
 
     const aluBody = document.getElementById('admin-alumnos-body');
@@ -251,9 +290,10 @@ function populateAdminDashboard() {
             <td>${esc(a.email)}</td>
             <td>${esc(a.whatsapp)}</td>
             <td><span class="badge-conectado">Registrado</span></td>
+            <td><button class="btn btn-sm btn-outline" onclick="showResetPassword('alumno', ${a.id}, '${esc(a.nombre)} ${esc(a.apellido)}')">🔑 Reset</button></td>
         </tr>`).join('');
     } else {
-        aluBody.innerHTML = '<tr><td colspan="11" class="empty-state">No hay alumnos registrados</td></tr>';
+        aluBody.innerHTML = '<tr><td colspan="12" class="empty-state">No hay alumnos registrados</td></tr>';
     }
 }
 
