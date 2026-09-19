@@ -1058,15 +1058,6 @@ function showModal(modalId) {
         overlay.querySelectorAll('.modal').forEach(m => m.style.display = 'none');
         modal.style.display = 'block';
         overlay.style.display = 'flex';
-
-        if (modalId === 'modal-nuevo-curso') {
-            const sel = document.getElementById('curso-escuela');
-            if (sel && USERS.docente && USERS.docente.escuelas) {
-                sel.innerHTML = USERS.docente.escuelas.map(e =>
-                    `<option value="${esc(e.nombre)}" ${e.nombre === USERS.docente.escuelaActual?.nombre ? 'selected' : ''}>${esc(e.nombre)}</option>`
-                ).join('');
-            }
-        }
     }
 }
 
