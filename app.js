@@ -1058,6 +1058,15 @@ function showModal(modalId) {
         overlay.querySelectorAll('.modal').forEach(m => m.style.display = 'none');
         modal.style.display = 'block';
         overlay.style.display = 'flex';
+
+        if (modalId === 'modal-nuevo-curso') {
+            const sel = document.getElementById('curso-escuela');
+            if (sel && USERS.docente && USERS.docente.escuelas) {
+                sel.innerHTML = USERS.docente.escuelas.map(e =>
+                    `<option value="${esc(e.nombre)}" ${e.nombre === USERS.docente.escuelaActual?.nombre ? 'selected' : ''}>${esc(e.nombre)}</option>`
+                ).join('');
+            }
+        }
     }
 }
 
@@ -1087,17 +1096,19 @@ function switchTab(btn, contentId) {
 // ============================================
 function crearCurso() {
     const nombre = document.getElementById('curso-nombre')?.value.trim();
+    const escuela = document.getElementById('curso-escuela')?.value;
     const anio = document.getElementById('curso-anio')?.value;
     const division = document.getElementById('curso-division')?.value.trim();
 
     if (!nombre) { showToast('Ingresá el nombre del curso', 'error'); return; }
+    if (!escuela) { showToast('Seleccioná una escuela', 'error'); return; }
 
     CURSOS.push({
         id: Date.now(),
         nombre: nombre,
         anio: anio,
         division: division,
-        escuela: USERS.docente?.escuelaActual?.nombre || '',
+        escuela: escuela,
         creadoPor: USERS.docente?.id
     });
     saveCursos();
