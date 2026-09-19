@@ -1085,11 +1085,10 @@ function switchTab(btn, contentId) {
 // ============================================
 // CURSOS (CRUD)
 // ============================================
-document.getElementById('form-nuevo-curso')?.addEventListener('submit', function(e) {
-    e.preventDefault();
-    const nombre = document.getElementById('curso-nombre').value.trim();
-    const anio = document.getElementById('curso-anio').value;
-    const division = document.getElementById('curso-division').value;
+function crearCurso() {
+    const nombre = document.getElementById('curso-nombre')?.value.trim();
+    const anio = document.getElementById('curso-anio')?.value;
+    const division = document.getElementById('curso-division')?.value.trim();
 
     if (!nombre) { showToast('Ingresá el nombre del curso', 'error'); return; }
 
@@ -1105,16 +1104,14 @@ document.getElementById('form-nuevo-curso')?.addEventListener('submit', function
     closeAllModals();
     updateDocenteDashboard();
     showToast('Curso creado correctamente', 'success');
-    e.target.reset();
-});
+}
 
 // ============================================
 // MATERIALES (CRUD)
 // ============================================
-document.getElementById('form-nuevo-material')?.addEventListener('submit', function(e) {
-    e.preventDefault();
-    const titulo = document.getElementById('material-titulo').value.trim();
-    const descripcion = document.getElementById('material-descripcion').value.trim();
+function crearMaterial() {
+    const titulo = document.getElementById('material-titulo')?.value.trim();
+    const descripcion = document.getElementById('material-descripcion')?.value.trim();
 
     if (!titulo) { showToast('Ingresá el título del material', 'error'); return; }
 
@@ -1122,22 +1119,22 @@ document.getElementById('form-nuevo-material')?.addEventListener('submit', funct
         id: Date.now(),
         titulo: titulo,
         descripcion: descripcion,
+        tipo: document.getElementById('material-tipo')?.value || 'PDF',
         fecha: new Date().toISOString(),
         creadoPor: USERS.docente?.id
     });
     saveMateriales();
     closeAllModals();
+    renderMateriales();
     showToast('Material subido correctamente', 'success');
-    e.target.reset();
-});
+}
 
 // ============================================
 // TRABAJOS PRÁCTICOS (CRUD)
 // ============================================
-document.getElementById('form-nuevo-tp')?.addEventListener('submit', function(e) {
-    e.preventDefault();
-    const titulo = document.getElementById('tp-titulo').value.trim();
-    const descripcion = document.getElementById('tp-descripcion').value.trim();
+function crearTP() {
+    const titulo = document.getElementById('tp-titulo')?.value.trim();
+    const descripcion = document.getElementById('tp-descripcion')?.value.trim();
     const fechaEntrega = document.getElementById('tp-fecha-entrega')?.value;
 
     if (!titulo) { showToast('Ingresá el título del TP', 'error'); return; }
@@ -1152,16 +1149,14 @@ document.getElementById('form-nuevo-tp')?.addEventListener('submit', function(e)
     });
     saveTP();
     closeAllModals();
-    updateDocenteDashboard();
+    renderTP();
     showToast('Trabajo Práctico creado correctamente', 'success');
-    e.target.reset();
-});
+}
 
 // ============================================
 // EXÁMENES (CRUD)
 // ============================================
-document.getElementById('form-nuevo-examen')?.addEventListener('submit', function(e) {
-    e.preventDefault();
+function crearExamen() {
     const titulo = document.getElementById('examen-titulo-input')?.value.trim();
     const duracion = document.getElementById('examen-duracion')?.value || 40;
 
@@ -1176,16 +1171,14 @@ document.getElementById('form-nuevo-examen')?.addEventListener('submit', functio
     });
     saveExamenes();
     closeAllModals();
-    updateDocenteDashboard();
+    renderExamenes();
     showToast('Examen creado correctamente', 'success');
-    e.target.reset();
-});
+}
 
 // ============================================
 // BANCO DE PREGUNTAS (CRUD)
 // ============================================
-document.getElementById('form-nueva-pregunta')?.addEventListener('submit', function(e) {
-    e.preventDefault();
+function agregarPregunta() {
     const tipo = document.getElementById('tipo-pregunta-select')?.value;
     const enunciado = document.getElementById('pregunta-enunciado-input')?.value.trim();
     const puntos = parseInt(document.getElementById('pregunta-puntos')?.value) || 1;
@@ -1210,9 +1203,9 @@ document.getElementById('form-nueva-pregunta')?.addEventListener('submit', funct
     });
     savePreguntas();
     closeAllModals();
+    renderPreguntasBanco();
     showToast('Pregunta agregada al banco', 'success');
-    e.target.reset();
-});
+}
 
 function updatePreguntaForm() {
     const tipo = document.getElementById('tipo-pregunta-select')?.value;
