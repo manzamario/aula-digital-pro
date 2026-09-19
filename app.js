@@ -84,6 +84,7 @@ let MATERIALES = [];
 let TRABAJOS_PRACTICOS = [];
 let EXAMENES = [];
 let ASISTENCIAS = [];
+let ALUMNOS_POR_CURSO = {};
 
 // ============================================
 // PERSISTENCIA (localStorage) — with error handling
@@ -128,6 +129,7 @@ function saveMateriales() { safeSet('aulaMateriales', MATERIALES); }
 function saveTP() { safeSet('aulaTP', TRABAJOS_PRACTICOS); }
 function saveExamenes() { safeSet('aulaExamenes', EXAMENES); }
 function saveAsistencias() { safeSet('aulaAsistencias', ASISTENCIAS); }
+function saveAlumnosPorCurso() { safeSet('aulaAlumnosPorCurso', ALUMNOS_POR_CURSO); }
 
 function loadPersistedData() {
     const u = safeGet('aulaUsers');
@@ -144,6 +146,7 @@ function loadPersistedData() {
     EXAMENES = safeGet('aulaExamenes') || [];
     ASISTENCIAS = safeGet('aulaAsistencias') || [];
     PREGUNTAS_BANCO = safeGet('aulaPreguntas') || [];
+    ALUMNOS_POR_CURSO = safeGet('aulaAlumnosPorCurso') || {};
 }
 
 function savePreguntas() { safeSet('aulaPreguntas', PREGUNTAS_BANCO); }
@@ -310,7 +313,8 @@ function updateDocenteDashboard() {
 
     const stats = document.querySelectorAll('#view-dashboard-docente .stat-number');
     if (stats[0]) stats[0].textContent = CURSOS.length;
-    if (stats[1]) stats[1].textContent = ALUMNOS_REGISTRADOS.length;
+    const totalAlumnos = Object.values(ALUMNOS_POR_CURSO).reduce((sum, arr) => sum + arr.length, 0);
+    if (stats[1]) stats[1].textContent = totalAlumnos;
     if (stats[2]) stats[2].textContent = TRABAJOS_PRACTICOS.filter(t => t.estado === 'pendiente').length;
     if (stats[3]) stats[3].textContent = EXAMENES.length;
 
@@ -339,11 +343,13 @@ function renderCursosList() {
 }
 
 function eliminarCurso(id) {
-    if (!confirm('¿Eliminar este curso?')) return;
+    if (!confirm('¿Eliminar este curso y todos sus alumnos?')) return;
     CURSOS = CURSOS.filter(c => c.id !== id);
+    delete ALUMNOS_POR_CURSO[id];
     saveCursos();
+    saveAlumnosPorCurso();
     updateDocenteDashboard();
-    showToast('Curso eliminado', 'success');
+    showToast('Curso y alumnos eliminados', 'success');
 }
 
 function updateAlumnoDashboard() {
@@ -387,6 +393,9 @@ function buildSidebar(role) {
                 <span class="nav-icon">🏠</span> Dashboard
             </div>
             <div class="nav-section"><div class="nav-section-title">Gestión</div></div>
+            <div class="nav-item" onclick="showView('view-gestionar-alumnos')" data-view="view-gestionar-alumnos">
+                <span class="nav-icon">👥</span> Gestionar Alumnos
+            </div>
             <div class="nav-item" onclick="showView('view-asistencia')" data-view="view-asistencia">
                 <span class="nav-icon">📋</span> Asistencia
             </div>
@@ -523,7 +532,9 @@ function showView(viewId) {
 }
 
 function initViewContent(viewId) {
-    if (viewId === 'view-asistencia') {
+    if (viewId === 'view-gestionar-alumnos') {
+        populateGACursoSelect();
+    } else if (viewId === 'view-asistencia') {
         const fechaEl = document.getElementById('asistencia-fecha');
         if (fechaEl) fechaEl.textContent = new Date().toLocaleDateString('es-AR', { day: 'numeric', month: 'long', year: 'numeric' });
         populateAsistenciaCursos();
@@ -556,6 +567,170 @@ function populateSelectOptions(selectId, options) {
     });
 }
 
+// ============================================
+// GESTIONAR ALUMNOS POR CURSO
+// ============================================
+let _csvAlumnosParsed = [];
+
+function populateGACursoSelect() {
+    populateSelectOptions('ga-curso-select', CURSOS.map(c => ({ value: c.id, label: `${c.nombre} — ${c.escuela}` })));
+    const el = document.getElementById('ga-content');
+    if (el) el.innerHTML = '<div class="card"><div class="card-body"><p class="empty-state">Seleccioná un curso para gestionar sus alumnos.</p></div></div>';
+}
+
+function cargarAlumnosCurso() {
+    const cursoId = document.getElementById('ga-curso-select')?.value;
+    const el = document.getElementById('ga-content');
+    if (!el) return;
+
+    if (!cursoId) {
+        el.innerHTML = '<div class="card"><div class="card-body"><p class="empty-state">Seleccioná un curso para gestionar sus alumnos.</p></div></div>';
+        return;
+    }
+
+    const curso = CURSOS.find(c => c.id == cursoId);
+    const alumnos = ALUMNOS_POR_CURSO[cursoId] || [];
+
+    let alumnosHtml = '';
+    if (alumnos.length === 0) {
+        alumnosHtml = '<p class="empty-state">No hay alumnos cargados. Importá un CSV o agregá alumnos manualmente.</p>';
+    } else {
+        alumnosHtml = `
+            <table class="data-table">
+                <thead><tr><th>#</th><th>Apellido</th><th>Nombre</th><th>DNI</th><th>Acciones</th></tr></thead>
+                <tbody>${alumnos.map((a, i) => `<tr>
+                    <td>${i + 1}</td>
+                    <td>${esc(a.apellido)}</td>
+                    <td>${esc(a.nombre)}</td>
+                    <td>${esc(a.dni || '-')}</td>
+                    <td><button class="btn btn-danger btn-sm" onclick="eliminarAlumnoDelCurso('${cursoId}', ${a.id})" style="padding:2px 8px;font-size:0.75rem;">✕</button></td>
+                </tr>`).join('')}</tbody>
+            </table>`;
+    }
+
+    el.innerHTML = `
+        <div class="card">
+            <div class="card-header">
+                <h3>📋 ${esc(curso.nombre)} — ${esc(curso.escuela)}</h3>
+                <span class="badge badge-blue">${alumnos.length} alumno${alumnos.length !== 1 ? 's' : ''}</span>
+            </div>
+            <div class="card-body" style="display:flex;gap:8px;flex-wrap:wrap;">
+                <button class="btn btn-primary" onclick="showModal('modal-importar-csv')">📤 Importar CSV</button>
+                <button class="btn btn-primary" onclick="showModal('modal-agregar-alumno-curso')">➕ Agregar Alumno</button>
+                ${alumnos.length > 0 ? `<button class="btn btn-danger" onclick="eliminarTodosAlumnosCurso('${cursoId}')">🗑️ Eliminar Todos</button>` : ''}
+            </div>
+        </div>
+        <div class="card" style="margin-top:1rem;">
+            <div class="card-body">${alumnosHtml}</div>
+        </div>`;
+}
+
+function previewCSV(input) {
+    const file = input.files[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = function(e) {
+        const lines = e.target.result.split('\n').map(l => l.trim()).filter(l => l);
+        _csvAlumnosParsed = [];
+        let startRow = 0;
+
+        if (lines.length > 0) {
+            const first = lines[0].toLowerCase();
+            if (first.includes('apellido') || first.includes('nombre') || first.includes('dni')) {
+                startRow = 1;
+            }
+        }
+
+        for (let i = startRow; i < lines.length; i++) {
+            const parts = lines[i].split(';');
+            if (parts.length >= 2) {
+                _csvAlumnosParsed.push({
+                    id: Date.now() + i,
+                    apellido: parts[0].trim(),
+                    nombre: parts[1].trim(),
+                    dni: parts[2] ? parts[2].trim() : ''
+                });
+            }
+        }
+
+        const preview = document.getElementById('csv-preview');
+        const btnConfirm = document.getElementById('btn-confirmar-csv');
+        if (!preview) return;
+
+        if (_csvAlumnosParsed.length === 0) {
+            preview.innerHTML = '<p style="color:var(--danger);">No se encontraron alumnos válidos en el archivo.</p>';
+            preview.style.display = 'block';
+            if (btnConfirm) btnConfirm.style.display = 'none';
+            return;
+        }
+
+        preview.innerHTML = `
+            <p style="font-weight:600;margin-bottom:8px;">Vista previa — ${_csvAlumnosParsed.length} alumno${_csvAlumnosParsed.length !== 1 ? 's' : ''} encontrado${_csvAlumnosParsed.length !== 1 ? 's' : ''}:</p>
+            <table class="data-table">
+                <thead><tr><th>Apellido</th><th>Nombre</th><th>DNI</th></tr></thead>
+                <tbody>${_csvAlumnosParsed.slice(0, 20).map(a => `<tr><td>${esc(a.apellido)}</td><td>${esc(a.nombre)}</td><td>${esc(a.dni || '-')}</td></tr>`).join('')}</tbody>
+            </table>
+            ${_csvAlumnosParsed.length > 20 ? `<p style="color:var(--text-secondary);font-size:0.85rem;margin-top:8px;">Mostrando 20 de ${_csvAlumnosParsed.length} alumnos.</p>` : ''}`;
+        preview.style.display = 'block';
+        if (btnConfirm) btnConfirm.style.display = 'inline-flex';
+    };
+    reader.readAsText(file);
+}
+
+function confirmarImportacionCSV() {
+    const cursoId = document.getElementById('ga-curso-select')?.value;
+    if (!cursoId) { showToast('Seleccioná un curso primero', 'error'); return; }
+    if (_csvAlumnosParsed.length === 0) { showToast('No hay alumnos para importar', 'error'); return; }
+
+    const existentes = ALUMNOS_POR_CURSO[cursoId] || [];
+    const existenteIds = new Set(existentes.map(a => `${a.apellido.toLowerCase()}_${a.nombre.toLowerCase()}`));
+    const nuevos = _csvAlumnosParsed.filter(a => !existenteIds.has(`${a.apellido.toLowerCase()}_${a.nombre.toLowerCase()}`));
+
+    ALUMNOS_POR_CURSO[cursoId] = [...existentes, ...nuevos];
+    saveAlumnosPorCurso();
+    _csvAlumnosParsed = [];
+    closeAllModals();
+    cargarAlumnosCurso();
+    showToast(`${nuevos.length} alumno${nuevos.length !== 1 ? 's' : ''} importado${nuevos.length !== 1 ? 's' : ''}`, 'success');
+}
+
+function agregarAlumnoManual() {
+    const cursoId = document.getElementById('ga-curso-select')?.value;
+    if (!cursoId) { showToast('Seleccioná un curso primero', 'error'); return; }
+
+    const apellido = document.getElementById('ga-alumno-apellido')?.value.trim();
+    const nombre = document.getElementById('ga-alumno-nombre')?.value.trim();
+    const dni = document.getElementById('ga-alumno-dni')?.value.trim();
+
+    if (!apellido || !nombre) { showToast('Completá apellido y nombre', 'error'); return; }
+
+    if (!ALUMNOS_POR_CURSO[cursoId]) ALUMNOS_POR_CURSO[cursoId] = [];
+    ALUMNOS_POR_CURSO[cursoId].push({ id: Date.now(), apellido, nombre, dni });
+    ALUMNOS_POR_CURSO[cursoId].sort((a, b) => a.apellido.localeCompare(b.apellido));
+    saveAlumnosPorCurso();
+    closeAllModals();
+    cargarAlumnosCurso();
+    showToast('Alumno agregado', 'success');
+}
+
+function eliminarAlumnoDelCurso(cursoId, alumnoId) {
+    if (!confirm('¿Eliminar este alumno?')) return;
+    if (!ALUMNOS_POR_CURSO[cursoId]) return;
+    ALUMNOS_POR_CURSO[cursoId] = ALUMNOS_POR_CURSO[cursoId].filter(a => a.id !== alumnoId);
+    saveAlumnosPorCurso();
+    cargarAlumnosCurso();
+    showToast('Alumno eliminado', 'success');
+}
+
+function eliminarTodosAlumnosCurso(cursoId) {
+    if (!confirm('¿Eliminar TODOS los alumnos de este curso? Esta acción no se puede deshacer.')) return;
+    ALUMNOS_POR_CURSO[cursoId] = [];
+    saveAlumnosPorCurso();
+    cargarAlumnosCurso();
+    showToast('Todos los alumnos eliminados del curso', 'success');
+}
+
 function populateAsistenciaCursos() {
     populateSelectOptions('asistencia-curso', CURSOS.map(c => ({ value: c.id, label: `${c.nombre} — ${c.escuela}` })));
     if (CURSOS.length === 0) {
@@ -583,7 +758,8 @@ function renderAsistenciaHistorial() {
         const fecha = new Date(a.fecha).toLocaleDateString('es-AR', { day: 'numeric', month: 'short', year: 'numeric' });
         const total = a.registros.length;
         const pres = a.registros.filter(r => r.presente).length;
-        return `<div style="display:flex;justify-content:space-between;align-items:center;padding:0.5rem 0;border-bottom:1px solid #e5e7eb;font-size:0.85rem;"><span>📅 ${fecha}</span><span><span class="badge badge-green">${pres} presentes</span> / <span class="badge badge-red">${total - pres} ausentes</span></span></div>`;
+        const curso = a.cursoNombre ? `<span style="margin-left:6px;color:var(--text-secondary);font-size:0.8rem;">— ${esc(a.cursoNombre)}</span>` : '';
+        return `<div style="display:flex;justify-content:space-between;align-items:center;padding:0.5rem 0;border-bottom:1px solid #e5e7eb;font-size:0.85rem;"><span>📅 ${fecha}${curso}</span><span><span class="badge badge-green">${pres} presentes</span> / <span class="badge badge-red">${total - pres} ausentes</span></span></div>`;
     }).join('');
 }
 
@@ -667,8 +843,11 @@ function renderAlumnoMonitor() {
     const grid = document.getElementById('alumno-monitor-grid');
     if (!grid) return;
 
+    const cursoId = document.getElementById('aula-curso-select')?.value;
+    const alumnos = cursoId ? (ALUMNOS_POR_CURSO[cursoId] || []) : ALUMNOS_REGISTRADOS;
+
     let html = '';
-    ALUMNOS_REGISTRADOS.forEach(alumno => {
+    alumnos.forEach(alumno => {
         const opps = getUserOportunidades(alumno.id);
         let dots = '';
         for (let i = 0; i < 5; i++) dots += `<div class="am-dot ${i >= opps ? 'used' : ''}"></div>`;
@@ -681,26 +860,24 @@ function renderAlumnoMonitor() {
         </div>`;
     });
 
-    grid.innerHTML = html || '<p class="empty-state">No hay alumnos registrados.</p>';
-    const conectados = ALUMNOS_REGISTRADOS.filter(a => a.conectado).length;
+    grid.innerHTML = html || '<p class="empty-state">No hay alumnos en este curso.</p>';
+    const conectados = alumnos.filter(a => a.conectado).length;
     const conectadosEl = document.getElementById('aula-conectados');
     if (conectadosEl) conectadosEl.textContent = conectados;
 }
-
-// ============================================
-// REALTIME — RENDER
 // ============================================
 function loadRealtimePanel() {
     const examenId = document.getElementById('realtime-examen-select')?.value;
     if (!examenId) { document.getElementById('realtime-live-badge').style.display = 'none'; return; }
     document.getElementById('realtime-live-badge').style.display = 'inline-flex';
 
+    const totalAlumnos = Object.values(ALUMNOS_POR_CURSO).reduce((sum, arr) => sum + arr.length, 0);
     const body = document.getElementById('realtime-alumnos-body');
-    if (ALUMNOS_REGISTRADOS.length === 0) {
-        body.innerHTML = '<tr><td colspan="4"><p class="empty-state">No hay alumnos registrados.</p></td></tr>';
+    if (totalAlumnos === 0) {
+        body.innerHTML = '<tr><td colspan="4"><p class="empty-state">No hay alumnos en los cursos.</p></td></tr>';
         return;
     }
-    body.innerHTML = ALUMNOS_REGISTRADOS.map(a => `<tr>
+    body.innerHTML = Object.values(ALUMNOS_POR_CURSO).flat().map((a, i) => `<tr>
         <td>${esc(a.apellido)}, ${esc(a.nombre)}</td>
         <td>00:00</td>
         <td>0/${PREGUNTAS_BANCO.length}</td>
@@ -1250,25 +1427,34 @@ function loadAsistenciaAlumnos() {
     const btnGuardar = document.getElementById('btn-guardar-asistencia');
     if (!lista) return;
 
+    const cursoId = document.getElementById('asistencia-curso')?.value;
+    if (!cursoId) {
+        lista.innerHTML = '<p class="empty-state">Seleccioná un curso para ver la lista</p>';
+        if (btnGuardar) btnGuardar.style.display = 'none';
+        return;
+    }
+
+    const alumnos = ALUMNOS_POR_CURSO[cursoId] || [];
+
     let html = '';
-    ALUMNOS_REGISTRADOS.forEach(alumno => {
+    alumnos.forEach(alumno => {
         html += `
             <div class="alumno-asistencia">
                 <input type="checkbox" id="asis-${alumno.id}" onchange="updateAsistenciaCount()">
                 <div class="aa-nombre">
                     <strong>${esc(alumno.apellido)}, ${esc(alumno.nombre)}</strong>
-                    <small>${esc(alumno.curso)}° Año ${esc(alumno.division)}</small>
+                    <small>${esc(alumno.dni || '')}</small>
                 </div>
                 <span class="badge badge-red">Ausente</span>
             </div>`;
     });
 
-    if (ALUMNOS_REGISTRADOS.length === 0) {
-        html = '<p class="empty-state">No hay alumnos registrados para tomar asistencia.</p>';
+    if (alumnos.length === 0) {
+        html = '<p class="empty-state">No hay alumnos cargados en este curso. Importá una lista desde "Gestionar Alumnos".</p>';
     }
 
     lista.innerHTML = html;
-    if (btnGuardar) btnGuardar.style.display = ALUMNOS_REGISTRADOS.length > 0 ? 'block' : 'none';
+    if (btnGuardar) btnGuardar.style.display = alumnos.length > 0 ? 'block' : 'none';
     updateAsistenciaCount();
 }
 
@@ -1293,13 +1479,17 @@ function updateAsistenciaCount() {
 }
 
 function guardarAsistencia() {
+    const cursoId = document.getElementById('asistencia-curso')?.value;
+    if (!cursoId) { showToast('Seleccioná un curso', 'error'); return; }
+
     const fecha = new Date().toISOString();
     const registros = [];
     const checkboxes = document.querySelectorAll('.alumno-asistencia input[type="checkbox"]');
+    const alumnos = ALUMNOS_POR_CURSO[cursoId] || [];
 
     checkboxes.forEach(cb => {
         const id = cb.id.replace('asis-', '');
-        const alumno = ALUMNOS_REGISTRADOS.find(a => String(a.id) === id);
+        const alumno = alumnos.find(a => String(a.id) === id);
         if (alumno) {
             registros.push({
                 alumnoId: alumno.id,
@@ -1310,8 +1500,10 @@ function guardarAsistencia() {
         }
     });
 
-    ASISTENCIAS.push({ fecha: fecha, registros: registros });
+    const curso = CURSOS.find(c => c.id == cursoId);
+    ASISTENCIAS.push({ fecha, cursoId: parseInt(cursoId), cursoNombre: curso?.nombre || '', registros });
     saveAsistencias();
+    renderAsistenciaHistorial();
     showToast('Asistencia guardada correctamente', 'success');
 }
 
@@ -1370,34 +1562,6 @@ function toggleAulaControlada() {
         if (content) content.style.display = 'none';
         showToast('Aula Controlada desactivada.', 'success');
     }
-}
-
-function renderAlumnoMonitor() {
-    const grid = document.getElementById('alumno-monitor-grid');
-    if (!grid) return;
-
-    let html = '';
-    ALUMNOS_REGISTRADOS.forEach(alumno => {
-        const opps = getUserOportunidades(alumno.id);
-        let dots = '';
-        for (let i = 0; i < 5; i++) {
-            dots += `<div class="am-dot ${i >= opps ? 'used' : ''}"></div>`;
-        }
-
-        html += `
-            <div class="alumno-monitor-card">
-                <div class="am-avatar">${esc(alumno.nombre.charAt(0))}</div>
-                <div class="am-name">${esc(alumno.apellido)}, ${esc(alumno.nombre)}</div>
-                <div class="am-oportunidades">${dots}</div>
-                <div class="am-status">${alumno.conectado ? '🟢 Conectado' : '🔴 Desconectado'}</div>
-            </div>`;
-    });
-
-    grid.innerHTML = html || '<p class="empty-state">No hay alumnos registrados.</p>';
-
-    const conectados = ALUMNOS_REGISTRADOS.filter(a => a.conectado).length;
-    const conectadosEl = document.getElementById('aula-conectados');
-    if (conectadosEl) conectadosEl.textContent = conectados;
 }
 
 function autorizarReingreso(btn, autorizar) {
