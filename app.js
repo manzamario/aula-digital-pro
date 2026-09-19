@@ -557,21 +557,15 @@ function populateSelectOptions(selectId, options) {
 }
 
 function populateAsistenciaCursos() {
-    const user = USERS.docente;
-    if (!user || !user.escuelaActual) return;
-    const cursos = CURSOS.filter(c => c.escuela === user.escuelaActual.nombre);
-    populateSelectOptions('asistencia-curso', cursos.map(c => ({ value: c.id, label: `${c.nombre} — ${c.escuela}` })));
-    if (cursos.length === 0) {
+    populateSelectOptions('asistencia-curso', CURSOS.map(c => ({ value: c.id, label: `${c.nombre} — ${c.escuela}` })));
+    if (CURSOS.length === 0) {
         const sel = document.getElementById('asistencia-curso');
         if (sel) sel.innerHTML = '<option value="">No hay cursos creados. Creá uno desde el Dashboard.</option>';
     }
 }
 
 function populateAulaCursos() {
-    const user = USERS.docente;
-    if (!user || !user.escuelaActual) return;
-    const cursos = CURSOS.filter(c => c.escuela === user.escuelaActual.nombre);
-    populateSelectOptions('aula-curso-select', cursos.map(c => ({ value: c.id, label: c.nombre })));
+    populateSelectOptions('aula-curso-select', CURSOS.map(c => ({ value: c.id, label: c.nombre })));
 }
 
 function populateRealtimeExamenes() {
