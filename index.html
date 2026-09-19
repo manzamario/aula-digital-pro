@@ -653,10 +653,11 @@
                                     <th>Materia</th>
                                     <th>Escuelas</th>
                                     <th>Estado</th>
+                                    <th>Acciones</th>
                                 </tr>
                             </thead>
                             <tbody id="admin-docentes-body">
-                                <tr><td colspan="7" class="empty-state">No hay docentes registrados</td></tr>
+                                <tr><td colspan="8" class="empty-state">No hay docentes registrados</td></tr>
                             </tbody>
                         </table>
                     </div>
@@ -683,10 +684,11 @@
                                     <th>Email</th>
                                     <th>WhatsApp</th>
                                     <th>Estado</th>
+                                    <th>Acciones</th>
                                 </tr>
                             </thead>
                             <tbody id="admin-alumnos-body">
-                                <tr><td colspan="11" class="empty-state">No hay alumnos registrados</td></tr>
+                                <tr><td colspan="12" class="empty-state">No hay alumnos registrados</td></tr>
                             </tbody>
                         </table>
                     </div>
@@ -1121,6 +1123,19 @@
                 </form>
             </div>
             <div class="modal-footer"><button class="btn btn-outline" onclick="closeAllModals()">Cancelar</button><button class="btn btn-primary" onclick="document.getElementById('form-nueva-pregunta').dispatchEvent(new Event('submit'))">Agregar Pregunta</button></div>
+        </div>
+
+        <div class="modal" id="modal-reset-password" onclick="event.stopPropagation()" style="display:none;">
+            <div class="modal-header"><h3>🔑 Restablecer Contraseña</h3><button class="modal-close" onclick="closeAllModals()">✕</button></div>
+            <div class="modal-body">
+                <p style="margin-bottom:1rem;">Usuario: <strong id="reset-user-name"></strong></p>
+                <form id="form-reset-password">
+                    <input type="hidden" id="reset-user-type">
+                    <input type="hidden" id="reset-user-id">
+                    <div class="form-group"><label>Nueva Contraseña *</label><input type="text" id="reset-new-password" required placeholder="Mínimo 8 caracteres" minlength="8"></div>
+                </form>
+            </div>
+            <div class="modal-footer"><button class="btn btn-outline" onclick="closeAllModals()">Cancelar</button><button class="btn btn-primary" onclick="aplicarResetPassword()">🔑 Aplicar Contraseña</button></div>
         </div>
 
         <div class="modal" id="modal-resultado-examen" onclick="event.stopPropagation()" style="display:none;">
