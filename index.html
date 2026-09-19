@@ -1072,7 +1072,7 @@
                     <div class="form-group"><label>Archivo / Contenido</label><div class="file-upload-area"><div class="upload-icon">📤</div><p>Arrastrá el archivo o hacé clic</p></div></div>
                 </form>
             </div>
-            <div class="modal-footer"><button class="btn btn-outline" onclick="closeAllModals()">Cancelar</button><button class="btn btn-primary" onclick="document.getElementById('form-nuevo-material').dispatchEvent(new Event('submit'))">Subir Material</button></div>
+            <div class="modal-footer"><button class="btn btn-outline" onclick="closeAllModals()">Cancelar</button><button class="btn btn-primary" onclick="crearMaterial()">Subir Material</button></div>
         </div>
 
         <div class="modal modal-lg" id="modal-nuevo-tp" onclick="event.stopPropagation()" style="display:none;">
@@ -1086,7 +1086,7 @@
                     <div class="form-group"><label>Consigna *</label><textarea class="form-textarea" id="tp-descripcion" rows="4" required placeholder="Descripción detallada del trabajo..."></textarea></div>
                 </form>
             </div>
-            <div class="modal-footer"><button class="btn btn-outline" onclick="closeAllModals()">Cancelar</button><button class="btn btn-primary" onclick="document.getElementById('form-nuevo-tp').dispatchEvent(new Event('submit'))">Crear TP</button></div>
+            <div class="modal-footer"><button class="btn btn-outline" onclick="closeAllModals()">Cancelar</button><button class="btn btn-primary" onclick="crearTP()">Crear TP</button></div>
         </div>
 
         <div class="modal modal-lg" id="modal-nuevo-examen" onclick="event.stopPropagation()" style="display:none;">
@@ -1099,7 +1099,7 @@
                     </div>
                 </form>
             </div>
-            <div class="modal-footer"><button class="btn btn-outline" onclick="closeAllModals()">Cancelar</button><button class="btn btn-primary" onclick="document.getElementById('form-nuevo-examen').dispatchEvent(new Event('submit'))">Crear Examen</button></div>
+            <div class="modal-footer"><button class="btn btn-outline" onclick="closeAllModals()">Cancelar</button><button class="btn btn-primary" onclick="crearExamen()">Crear Examen</button></div>
         </div>
 
         <div class="modal modal-lg" id="modal-nueva-pregunta" onclick="event.stopPropagation()" style="display:none;">
@@ -1122,7 +1122,7 @@
                     </div>
                 </form>
             </div>
-            <div class="modal-footer"><button class="btn btn-outline" onclick="closeAllModals()">Cancelar</button><button class="btn btn-primary" onclick="document.getElementById('form-nueva-pregunta').dispatchEvent(new Event('submit'))">Agregar Pregunta</button></div>
+            <div class="modal-footer"><button class="btn btn-outline" onclick="closeAllModals()">Cancelar</button><button class="btn btn-primary" onclick="agregarPregunta()">Agregar Pregunta</button></div>
         </div>
 
         <div class="modal" id="modal-nuevo-curso" onclick="event.stopPropagation()" style="display:none;">
@@ -1136,7 +1136,7 @@
                     </div>
                 </form>
             </div>
-            <div class="modal-footer"><button class="btn btn-outline" onclick="closeAllModals()">Cancelar</button><button class="btn btn-primary" onclick="document.getElementById('form-nuevo-curso').dispatchEvent(new Event('submit'))">Crear Curso</button></div>
+            <div class="modal-footer"><button class="btn btn-outline" onclick="closeAllModals()">Cancelar</button><button class="btn btn-primary" onclick="crearCurso()">Crear Curso</button></div>
         </div>
 
         <div class="modal" id="modal-reset-password" onclick="event.stopPropagation()" style="display:none;">
