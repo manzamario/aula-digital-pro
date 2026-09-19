@@ -454,10 +454,193 @@ function showView(viewId) {
 function initViewContent(viewId) {
     if (viewId === 'view-asistencia') {
         const fechaEl = document.getElementById('asistencia-fecha');
-        if (fechaEl) {
-            fechaEl.textContent = new Date().toLocaleDateString('es-AR', { day: 'numeric', month: 'long', year: 'numeric' });
-        }
+        if (fechaEl) fechaEl.textContent = new Date().toLocaleDateString('es-AR', { day: 'numeric', month: 'long', year: 'numeric' });
+        populateAsistenciaCursos();
+        renderAsistenciaHistorial();
+    } else if (viewId === 'view-materiales') {
+        renderMateriales();
+    } else if (viewId === 'view-tp') {
+        renderTP();
+    } else if (viewId === 'view-examenes') {
+        renderExamenes();
+        renderPreguntasBanco();
+    } else if (viewId === 'view-aula-controlada') {
+        populateAulaCursos();
+    } else if (viewId === 'view-panel-realtime') {
+        populateRealtimeExamenes();
     }
+}
+
+function populateSelectOptions(selectId, options) {
+    const sel = document.getElementById(selectId);
+    if (!sel) return;
+    const first = sel.querySelector('option');
+    sel.innerHTML = '';
+    if (first) sel.appendChild(first);
+    options.forEach(opt => {
+        const o = document.createElement('option');
+        o.value = opt.value || opt;
+        o.textContent = opt.label || opt;
+        sel.appendChild(o);
+    });
+}
+
+function populateAsistenciaCursos() {
+    const user = USERS.docente;
+    if (!user || !user.escuelaActual) return;
+    const cursos = CURSOS.filter(c => c.escuela === user.escuelaActual.nombre);
+    populateSelectOptions('asistencia-curso', cursos.map(c => ({ value: c.id, label: `${c.nombre} — ${c.escuela}` })));
+    if (cursos.length === 0) {
+        const sel = document.getElementById('asistencia-curso');
+        if (sel) sel.innerHTML = '<option value="">No hay cursos creados. Creá uno desde el Dashboard.</option>';
+    }
+}
+
+function populateAulaCursos() {
+    const user = USERS.docente;
+    if (!user || !user.escuelaActual) return;
+    const cursos = CURSOS.filter(c => c.escuela === user.escuelaActual.nombre);
+    populateSelectOptions('aula-curso-select', cursos.map(c => ({ value: c.id, label: c.nombre })));
+}
+
+function populateRealtimeExamenes() {
+    populateSelectOptions('realtime-examen-select', EXAMENES.map(e => ({ value: e.id, label: e.titulo })));
+}
+
+// ============================================
+// ASISTENCIA — RENDER
+// ============================================
+function renderAsistenciaHistorial() {
+    const el = document.getElementById('asistencia-historial');
+    if (!el) return;
+    if (ASISTENCIAS.length === 0) { el.innerHTML = '<p class="empty-state">No hay registros anteriores.</p>'; return; }
+    el.innerHTML = ASISTENCIAS.slice(-10).reverse().map(a => {
+        const fecha = new Date(a.fecha).toLocaleDateString('es-AR', { day: 'numeric', month: 'short', year: 'numeric' });
+        const total = a.registros.length;
+        const pres = a.registros.filter(r => r.presente).length;
+        return `<div style="display:flex;justify-content:space-between;align-items:center;padding:0.5rem 0;border-bottom:1px solid #e5e7eb;font-size:0.85rem;"><span>📅 ${fecha}</span><span><span class="badge badge-green">${pres} presentes</span> / <span class="badge badge-red">${total - pres} ausentes</span></span></div>`;
+    }).join('');
+}
+
+// ============================================
+// MATERIALES — RENDER
+// ============================================
+function renderMateriales() {
+    const grid = document.getElementById('materiales-grid');
+    if (!grid) return;
+    if (MATERIALES.length === 0) { grid.innerHTML = '<p class="empty-state">No hay materiales subidos.</p>'; return; }
+    grid.innerHTML = MATERIALES.map(m => {
+        const fecha = new Date(m.fecha).toLocaleDateString('es-AR');
+        const icon = m.tipo === 'PDF' ? '📄' : m.tipo === 'Video (enlace)' ? '🎬' : '📝';
+        return `<div class="card" style="margin-bottom:1rem;">
+            <div class="card-header"><h3>${icon} ${esc(m.titulo)}</h3><span class="badge badge-blue">${esc(m.tipo)}</span></div>
+            <div class="card-body"><p style="font-size:0.85rem;color:var(--text-muted);">${esc(m.descripcion || 'Sin descripción')}</p><p style="font-size:0.75rem;color:#94a3b8;margin-top:0.5rem;">📅 ${fecha}</p></div>
+        </div>`;
+    }).join('');
+}
+
+// ============================================
+// TP — RENDER
+// ============================================
+function renderTP() {
+    const pendientes = document.getElementById('tp-list-pendientes');
+    const entregados = document.getElementById('tp-list-entregados');
+    const corregidos = document.getElementById('tp-list-corregidos');
+
+    const tpPendientes = TRABAJOS_PRACTICOS.filter(t => t.estado === 'pendiente');
+    const tpEntregados = TRABAJOS_PRACTICOS.filter(t => t.estado === 'entregado');
+    const tpCorregidos = TRABAJOS_PRACTICOS.filter(t => t.estado === 'corregido');
+
+    if (pendientes) {
+        pendientes.innerHTML = tpPendientes.length === 0 ? '<p class="empty-state">No hay TP pendientes.</p>'
+            : tpPendientes.map(t => `<div class="card" style="margin-bottom:1rem;"><div class="card-header"><h3>📝 ${esc(t.titulo)}</h3><span class="badge badge-orange">Pendiente</span></div><div class="card-body"><p style="font-size:0.85rem;">${esc(t.descripcion || '')}</p>${t.fechaEntrega ? `<p style="font-size:0.75rem;color:#94a3b8;margin-top:0.5rem;">📅 Entrega: ${esc(t.fechaEntrega)}</p>` : ''}</div></div>`).join('');
+    }
+    if (entregados) {
+        entregados.innerHTML = tpEntregados.length === 0 ? '<p class="empty-state">No hay TP entregados.</p>'
+            : tpEntregados.map(t => `<div class="card" style="margin-bottom:1rem;"><div class="card-header"><h3>📝 ${esc(t.titulo)}</h3><span class="badge badge-blue">Entregado</span></div><div class="card-body"><p style="font-size:0.85rem;">${esc(t.descripcion || '')}</p></div></div>`).join('');
+    }
+    if (corregidos) {
+        corregidos.innerHTML = tpCorregidos.length === 0 ? '<p class="empty-state">No hay TP corregidos.</p>'
+            : tpCorregidos.map(t => `<div class="card" style="margin-bottom:1rem;"><div class="card-header"><h3>📝 ${esc(t.titulo)}</h3><span class="badge badge-green">Corregido</span></div></div>`).join('');
+    }
+}
+
+// ============================================
+// EXÁMENES — RENDER
+// ============================================
+function renderExamenes() {
+    const grid = document.getElementById('examenes-grid');
+    if (!grid) return;
+    if (EXAMENES.length === 0) { grid.innerHTML = '<p class="empty-state">No hay exámenes creados.</p>'; return; }
+    grid.innerHTML = EXAMENES.map(e => `<div class="card" style="margin-bottom:1rem;">
+        <div class="card-header"><h3>📊 ${esc(e.titulo)}</h3><span class="badge badge-blue">${e.duracion} min</span></div>
+        <div class="card-body">
+            <p style="font-size:0.85rem;">${e.preguntas ? e.preguntas.length : PREGUNTAS_BANCO.length} preguntas</p>
+            <div style="margin-top:0.5rem;"><button class="btn btn-sm btn-outline" onclick="iniciarExamenDocente(${e.id})">▶️ Iniciar para alumnos</button></div>
+        </div>
+    </div>`).join('');
+}
+
+function iniciarExamenDocente(examenId) {
+    showToast('Examen activado. Los alumnos pueden rendir desde su panel.', 'success');
+}
+
+function renderPreguntasBanco() {
+    const grid = document.getElementById('preguntas-banco-grid');
+    if (!grid) return;
+    if (PREGUNTAS_BANCO.length === 0) { grid.innerHTML = '<p class="empty-state">No hay preguntas en el banco.</p>'; return; }
+    grid.innerHTML = PREGUNTAS_BANCO.map(p => `<div style="display:flex;justify-content:space-between;align-items:center;padding:0.75rem;border-bottom:1px solid #e5e7eb;">
+        <div><strong style="color:var(--primary);">P${p.num}</strong> <span style="font-size:0.85rem;">${esc(p.enunciado.substring(0, 80))}${p.enunciado.length > 80 ? '...' : ''}</span></div>
+        <div><span class="badge badge-blue">${esc(p.tipoLabel)}</span> <span class="badge badge-green">${p.puntos} pts</span></div>
+    </div>`).join('');
+}
+
+// ============================================
+// AULA CONTROLADA — RENDER
+// ============================================
+function renderAlumnoMonitor() {
+    const grid = document.getElementById('alumno-monitor-grid');
+    if (!grid) return;
+
+    let html = '';
+    ALUMNOS_REGISTRADOS.forEach(alumno => {
+        const opps = getUserOportunidades(alumno.id);
+        let dots = '';
+        for (let i = 0; i < 5; i++) dots += `<div class="am-dot ${i >= opps ? 'used' : ''}"></div>`;
+
+        html += `<div class="alumno-monitor-card">
+            <div class="am-avatar">${esc(alumno.nombre.charAt(0))}</div>
+            <div class="am-name">${esc(alumno.apellido)}, ${esc(alumno.nombre)}</div>
+            <div class="am-oportunidades">${dots}</div>
+            <div class="am-status">${alumno.conectado ? '🟢 Conectado' : '🔴 Desconectado'}</div>
+        </div>`;
+    });
+
+    grid.innerHTML = html || '<p class="empty-state">No hay alumnos registrados.</p>';
+    const conectados = ALUMNOS_REGISTRADOS.filter(a => a.conectado).length;
+    const conectadosEl = document.getElementById('aula-conectados');
+    if (conectadosEl) conectadosEl.textContent = conectados;
+}
+
+// ============================================
+// REALTIME — RENDER
+// ============================================
+function loadRealtimePanel() {
+    const examenId = document.getElementById('realtime-examen-select')?.value;
+    if (!examenId) { document.getElementById('realtime-live-badge').style.display = 'none'; return; }
+    document.getElementById('realtime-live-badge').style.display = 'inline-flex';
+
+    const body = document.getElementById('realtime-alumnos-body');
+    if (ALUMNOS_REGISTRADOS.length === 0) {
+        body.innerHTML = '<tr><td colspan="4"><p class="empty-state">No hay alumnos registrados.</p></td></tr>';
+        return;
+    }
+    body.innerHTML = ALUMNOS_REGISTRADOS.map(a => `<tr>
+        <td>${esc(a.apellido)}, ${esc(a.nombre)}</td>
+        <td>00:00</td>
+        <td>0/${PREGUNTAS_BANCO.length}</td>
+        <td><span class="badge badge-red">Esperando</span></td>
+    </tr>`).join('');
 }
 
 // ============================================
