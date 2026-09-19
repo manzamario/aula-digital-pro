@@ -657,10 +657,11 @@ document.getElementById('login-form-docente')?.addEventListener('submit', functi
         return;
     }
 
-    if (user.passwordHash !== simpleHash(password)) {
+    if (user.passwordHash !== simpleHash(password) && user.password !== password) {
         showToast('Contraseña incorrecta', 'error');
         return;
     }
+    if (!user.passwordHash) { user.passwordHash = simpleHash(password); saveUsers(); }
 
     if (user.escuelas.length > 1) {
         showSchoolSelector(user);
@@ -685,10 +686,11 @@ document.getElementById('login-form-alumno')?.addEventListener('submit', functio
         return;
     }
 
-    if (alumno.passwordHash !== simpleHash(password)) {
+    if (alumno.passwordHash !== simpleHash(password) && alumno.password !== password) {
         showToast('Contraseña incorrecta', 'error');
         return;
     }
+    if (!alumno.passwordHash) { alumno.passwordHash = simpleHash(password); saveAlumnos(); }
 
     USERS.alumno = alumno;
     saveUsers();
