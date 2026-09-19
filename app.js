@@ -313,6 +313,37 @@ function updateDocenteDashboard() {
     if (stats[1]) stats[1].textContent = ALUMNOS_REGISTRADOS.length;
     if (stats[2]) stats[2].textContent = TRABAJOS_PRACTICOS.filter(t => t.estado === 'pendiente').length;
     if (stats[3]) stats[3].textContent = EXAMENES.length;
+
+    renderCursosList();
+}
+
+function renderCursosList() {
+    const el = document.getElementById('cursos-list');
+    if (!el) return;
+    if (CURSOS.length === 0) {
+        el.innerHTML = '<p class="empty-state">No tenés cursos creados. Creá tu primer curso para comenzar.</p>';
+        return;
+    }
+    el.innerHTML = CURSOS.map(c => `
+        <div class="list-item" style="display:flex; justify-content:space-between; align-items:center; padding:10px 0; border-bottom:1px solid var(--border-color);">
+            <div>
+                <strong>${esc(c.nombre)}</strong>
+                <span style="color:var(--text-secondary); font-size:0.85rem; margin-left:8px;">${esc(c.escuela || 'Sin escuela')}</span>
+            </div>
+            <div style="display:flex; gap:6px;">
+                <span style="color:var(--text-secondary); font-size:0.85rem;">${esc(c.anio || '')} ${esc(c.division || '')}</span>
+                <button class="btn btn-danger btn-sm" onclick="eliminarCurso(${c.id})" style="padding:2px 8px; font-size:0.75rem;">✕</button>
+            </div>
+        </div>
+    `).join('');
+}
+
+function eliminarCurso(id) {
+    if (!confirm('¿Eliminar este curso?')) return;
+    CURSOS = CURSOS.filter(c => c.id !== id);
+    saveCursos();
+    updateDocenteDashboard();
+    showToast('Curso eliminado', 'success');
 }
 
 function updateAlumnoDashboard() {
