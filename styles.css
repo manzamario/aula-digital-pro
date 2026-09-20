@@ -3184,19 +3184,32 @@ input, select, textarea, button {
     -moz-appearance: checkbox;
 }
 .db-table .admin-action-cell {
-    min-width: 220px;
-    white-space: normal;
+    min-width: 210px;
+    white-space: nowrap;
+    overflow: visible;
+    padding-right: 0.9rem;
 }
 .db-table .admin-action-group {
     display: flex;
-    flex-wrap: wrap;
+    flex-wrap: nowrap;
     align-items: center;
-    gap: 0.35rem;
-    min-width: 210px;
+    justify-content: flex-end;
+    gap: 0.5rem;
+    width: 100%;
+    min-width: 190px;
 }
 .db-table .admin-action-group .btn {
     margin: 0.1rem 0;
     min-width: 90px;
+    padding: 0.45rem 0.8rem;
+    border-radius: 10px;
+    font-size: 0.75rem;
+    box-shadow: 0 2px 8px rgba(79, 70, 229, 0.12);
+}
+.db-table .admin-action-group .btn-danger {
+    background: linear-gradient(180deg, #ef4444 0%, #dc2626 100%);
+    border: 1px solid rgba(220, 38, 38, 0.25);
+    box-shadow: 0 4px 10px rgba(220, 38, 38, 0.2);
 }
 #view-dashboard-admin .card {
     min-width: 0;
