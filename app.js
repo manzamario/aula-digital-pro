@@ -1978,42 +1978,51 @@ function generarQR() {
         return;
     }
 
-    if (!window.QRCode) {
-        console.error('[AulaDigital] QRCode library no está disponible.');
-        showToast('No se pudo generar el QR en este navegador.', 'error');
-        return;
-    }
-
     if (qrDisplay) qrDisplay.style.display = 'block';
 
     const payload = buildAsistenciaQRPayload();
     const qrUrl = buildAsistenciaQRUrl(payload);
-    if (qrCodeEl) {
-        qrCodeEl.innerHTML = '';
+    if (!qrCodeEl) return;
 
-        const canvas = document.createElement('canvas');
-        canvas.width = 180;
-        canvas.height = 180;
-        canvas.setAttribute('aria-label', 'Código QR de asistencia');
-        canvas.title = 'Código QR de asistencia';
+    qrCodeEl.innerHTML = '';
 
-        QRCode.toCanvas(canvas, qrUrl, {
-            width: 180,
-            margin: 1,
-            color: {
-                dark: '#101828',
-                light: '#ffffff'
-            }
-        }, (error) => {
-            if (error) {
-                console.error('[AulaDigital] Error generando QR:', error);
-                qrCodeEl.innerHTML = '<div class="empty-state">No se pudo generar el QR.</div>';
-                return;
-            }
-            qrCodeEl.appendChild(canvas);
-        });
-    }
+    const qrImage = document.createElement('img');
+    qrImage.alt = 'Código QR de asistencia';
+    qrImage.title = 'Código QR de asistencia';
+    qrImage.style.width = '100%';
+    qrImage.style.height = '100%';
+    qrImage.style.objectFit = 'contain';
+    qrImage.style.display = 'block';
+    qrImage.style.borderRadius = '6px';
 
+    const qrApiUrl = `https://api.qrserver.com/v1/create-qr-code/?size=220x220&format=png&data=${encodeURIComponent(qrUrl)}`;
+    qrImage.src = qrApiUrl;
+    qrImage.onerror = () => {
+        console.warn('[AulaDigital] QR remote fallback failed; trying local canvas generator.');
+        if (window.QRCode) {
+            const canvas = document.createElement('canvas');
+            canvas.width = 180;
+            canvas.height = 180;
+            canvas.setAttribute('aria-label', 'Código QR de asistencia');
+            canvas.title = 'Código QR de asistencia';
+            QRCode.toCanvas(canvas, qrUrl, {
+                width: 180,
+                margin: 1,
+                color: { dark: '#101828', light: '#ffffff' }
+            }, (error) => {
+                if (error) {
+                    console.error('[AulaDigital] Error generando QR:', error);
+                    qrCodeEl.innerHTML = '<div class="empty-state">No se pudo generar el QR.</div>';
+                    return;
+                }
+                qrCodeEl.appendChild(canvas);
+            });
+            return;
+        }
+        qrCodeEl.innerHTML = '<div class="empty-state">No se pudo generar el QR.</div>';
+    };
+
+    qrCodeEl.appendChild(qrImage);
     startQRTimer();
     showToast('QR generado. Válido por 5 minutos.', 'success');
 }
