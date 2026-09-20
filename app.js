@@ -382,6 +382,20 @@ function aplicarResetPassword() {
     }
 }
 
+function getSelectedUserIds(type) {
+    const selector = type === 'docente' ? 'input[data-user-type="docente"][data-selected="true"]' : 'input[data-user-type="alumno"][data-selected="true"]';
+    return Array.from(document.querySelectorAll(selector)).map(el => Number(el.value)).filter(Boolean);
+}
+
+function toggleUserSelection(type, id, checked) {
+    const selector = `input[data-user-type="${type}"][value="${id}"]`;
+    const item = document.querySelector(selector);
+    if (item) {
+        item.dataset.selected = checked ? 'true' : 'false';
+        item.checked = checked;
+    }
+}
+
 function eliminarDocente(docenteId) {
     if (!confirm('¿Querés eliminar este docente y su acceso?')) return;
 
@@ -392,6 +406,55 @@ function eliminarDocente(docenteId) {
 
     populateAdminDashboard();
     showToast('Docente eliminado', 'success');
+}
+
+function eliminarAlumnosSeleccionados() {
+    const ids = getSelectedUserIds('alumno');
+    if (ids.length === 0) {
+        showToast('Seleccioná al menos un alumno para eliminar', 'warning');
+        return;
+    }
+
+    if (!confirm(`¿Querés eliminar ${ids.length} alumno(s) seleccionados?`)) return;
+
+    const inicial = ALUMNOS_REGISTRADOS.length;
+    ALUMNOS_REGISTRADOS = ALUMNOS_REGISTRADOS.filter(a => !ids.includes(Number(a.id)));
+    Object.keys(ALUMNOS_POR_CURSO).forEach(cursoId => {
+        ALUMNOS_POR_CURSO[cursoId] = (ALUMNOS_POR_CURSO[cursoId] || []).filter(a => !ids.includes(Number(a.id)));
+        if (ALUMNOS_POR_CURSO[cursoId].length === 0) {
+            delete ALUMNOS_POR_CURSO[cursoId];
+        }
+    });
+
+    if (USERS.alumno && ids.includes(Number(USERS.alumno.id))) {
+        USERS.alumno = null;
+    }
+
+    if (ALUMNOS_REGISTRADOS.length !== inicial) {
+        saveAlumnos();
+        saveAlumnosPorCurso();
+    }
+
+    populateAdminDashboard();
+    showToast(`${ids.length} alumno(s) eliminados`, 'success');
+}
+
+function eliminarDocentesSeleccionados() {
+    const ids = getSelectedUserIds('docente');
+    if (ids.length === 0) {
+        showToast('Seleccioná al menos un docente para eliminar', 'warning');
+        return;
+    }
+
+    if (!confirm(`¿Querés eliminar ${ids.length} docente(s) seleccionados?`)) return;
+
+    if (USERS.docente && ids.includes(Number(USERS.docente.id))) {
+        USERS.docente = null;
+        saveUsers();
+    }
+
+    populateAdminDashboard();
+    showToast(`${ids.length} docente(s) eliminados`, 'success');
 }
 
 function eliminarAlumno(alumnoId) {
@@ -517,6 +580,7 @@ function populateAdminDashboard() {
         const d = USERS.docente;
         const escuelasStr = esc(d.escuelas.map(e => e.nombre).join(', '));
         docBody.innerHTML = `<tr>
+            <td class="admin-check-cell"><input type="checkbox" data-user-type="docente" data-selected="false" value="${esc(d.id)}" class="admin-selection-checkbox" onchange="toggleUserSelection('docente', ${d.id}, this.checked)"></td>
             <td>${esc(d.id)}</td>
             <td>${esc(d.nombre)}</td>
             <td>${esc(d.apellido)}</td>
@@ -532,12 +596,13 @@ function populateAdminDashboard() {
             </td>
         </tr>`;
     } else {
-        docBody.innerHTML = '<tr><td colspan="8" class="empty-state">No hay docentes registrados</td></tr>';
+        docBody.innerHTML = '<tr><td colspan="9" class="empty-state">No hay docentes registrados</td></tr>';
     }
 
     const aluBody = document.getElementById('admin-alumnos-body');
     if (ALUMNOS_REGISTRADOS.length > 0) {
         aluBody.innerHTML = ALUMNOS_REGISTRADOS.map(a => `<tr>
+            <td class="admin-check-cell"><input type="checkbox" data-user-type="alumno" data-selected="false" value="${esc(a.id)}" class="admin-selection-checkbox" onchange="toggleUserSelection('alumno', ${a.id}, this.checked)"></td>
             <td>${esc(a.id)}</td>
             <td>${esc(a.nombre)}</td>
             <td>${esc(a.apellido)}</td>
@@ -557,7 +622,7 @@ function populateAdminDashboard() {
             </td>
         </tr>`).join('');
     } else {
-        aluBody.innerHTML = '<tr><td colspan="12" class="empty-state">No hay alumnos registrados</td></tr>';
+        aluBody.innerHTML = '<tr><td colspan="13" class="empty-state">No hay alumnos registrados</td></tr>';
     }
 }
 
