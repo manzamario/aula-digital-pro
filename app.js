@@ -300,6 +300,28 @@ function loadPersistedData() {
     ASISTENCIAS = safeGet('aulaAsistencias') || [];
     PREGUNTAS_BANCO = safeGet('aulaPreguntas') || [];
     ALUMNOS_POR_CURSO = safeGet('aulaAlumnosPorCurso') || {};
+
+    if (Object.keys(ALUMNOS_POR_CURSO).length === 0 && ALUMNOS_REGISTRADOS.length > 0) {
+        ALUMNOS_POR_CURSO = ALUMNOS_REGISTRADOS.reduce((acc, alumno) => {
+            const courseId = String(alumno.curso || '');
+            if (!courseId) return acc;
+            if (!acc[courseId]) acc[courseId] = [];
+            acc[courseId].push({
+                id: alumno.id,
+                nombre: alumno.nombre,
+                apellido: alumno.apellido,
+                dni: alumno.dni,
+                division: alumno.division,
+                curso: alumno.curso,
+                escuela: alumno.escuela,
+                email: alumno.email,
+                whatsapp: alumno.whatsapp,
+                conectado: !!alumno.conectado
+            });
+            return acc;
+        }, {});
+        saveAlumnosPorCurso();
+    }
 }
 
 function savePreguntas() { safeSet('aulaPreguntas', PREGUNTAS_BANCO); }
@@ -384,6 +406,8 @@ function showScreen(screenId) {
 }
 
 function showApp(role) {
+    loadPersistedData();
+
     if (!USERS[role]) {
         showScreen('screen-welcome');
         showToast('No existe un usuario activo para este rol.', 'error');
@@ -1330,6 +1354,25 @@ document.getElementById('register-form')?.addEventListener('submit', function(e)
 
     ALUMNOS_REGISTRADOS.push(newAlumno);
     USERS.alumno = newAlumno;
+
+    const cursoId = String(newAlumno.curso || '');
+    if (cursoId) {
+        if (!ALUMNOS_POR_CURSO[cursoId]) ALUMNOS_POR_CURSO[cursoId] = [];
+        ALUMNOS_POR_CURSO[cursoId].push({
+            id: newAlumno.id,
+            nombre: newAlumno.nombre,
+            apellido: newAlumno.apellido,
+            dni: newAlumno.dni,
+            division: newAlumno.division,
+            curso: newAlumno.curso,
+            escuela: newAlumno.escuela,
+            email: newAlumno.email,
+            whatsapp: newAlumno.whatsapp,
+            conectado: false
+        });
+        saveAlumnosPorCurso();
+    }
+
     saveAlumnos();
     saveUsers();
 
