@@ -334,34 +334,89 @@ function showResetPassword(type, id, nombre) {
     document.getElementById('reset-user-id').value = id;
     document.getElementById('reset-user-name').textContent = nombre;
     document.getElementById('reset-new-password').value = '';
+    document.getElementById('reset-new-password').placeholder = 'Ej: NuevaClave2026!';
     showModal('modal-reset-password');
 }
 
 function aplicarResetPassword() {
     const type = document.getElementById('reset-user-type').value;
-    const id = parseInt(document.getElementById('reset-user-id').value);
+    const id = parseInt(document.getElementById('reset-user-id').value, 10);
     const newPassword = document.getElementById('reset-new-password').value;
 
-    if (newPassword.length < 8) {
+    if (!newPassword || newPassword.trim().length < 8) {
         showToast('La contraseña debe tener al menos 8 caracteres', 'error');
         return;
     }
 
-    const hash = simpleHash(newPassword);
+    if (!isStrongPassword(newPassword)) {
+        showToast('La contraseña debe incluir mayúscula, minúscula y número', 'error');
+        return;
+    }
 
-    if (type === 'docente' && USERS.docente && USERS.docente.id === id) {
-        USERS.docente.passwordHash = hash;
-        saveUsers();
+    const hash = simpleHash(newPassword);
+    let updated = false;
+
+    if (type === 'docente') {
+        if (USERS.docente && Number(USERS.docente.id) === Number(id)) {
+            USERS.docente.passwordHash = hash;
+            saveUsers();
+            updated = true;
+        }
     } else if (type === 'alumno') {
-        const alumno = ALUMNOS_REGISTRADOS.find(a => a.id === id);
+        const alumno = ALUMNOS_REGISTRADOS.find(a => Number(a.id) === Number(id));
         if (alumno) {
             alumno.passwordHash = hash;
+            if (USERS.alumno && Number(USERS.alumno.id) === Number(id)) {
+                USERS.alumno.passwordHash = hash;
+            }
             saveAlumnos();
+            updated = true;
         }
     }
 
     closeAllModals();
-    showToast('Contraseña restablecida correctamente', 'success');
+    if (updated) {
+        showToast('Contraseña restablecida correctamente por el administrador', 'success');
+    } else {
+        showToast('No se encontró el usuario para actualizar la contraseña', 'error');
+    }
+}
+
+function eliminarDocente(docenteId) {
+    if (!confirm('¿Querés eliminar este docente y su acceso?')) return;
+
+    if (USERS.docente && Number(USERS.docente.id) === Number(docenteId)) {
+        USERS.docente = null;
+        saveUsers();
+    }
+
+    populateAdminDashboard();
+    showToast('Docente eliminado', 'success');
+}
+
+function eliminarAlumno(alumnoId) {
+    if (!confirm('¿Querés eliminar este alumno de la base de datos?')) return;
+
+    const inicial = ALUMNOS_REGISTRADOS.length;
+    ALUMNOS_REGISTRADOS = ALUMNOS_REGISTRADOS.filter(a => Number(a.id) !== Number(alumnoId));
+    Object.keys(ALUMNOS_POR_CURSO).forEach(cursoId => {
+        ALUMNOS_POR_CURSO[cursoId] = (ALUMNOS_POR_CURSO[cursoId] || []).filter(a => Number(a.id) !== Number(alumnoId));
+        if (ALUMNOS_POR_CURSO[cursoId].length === 0) {
+            delete ALUMNOS_POR_CURSO[cursoId];
+        }
+    });
+
+    if (USERS.alumno && Number(USERS.alumno.id) === Number(alumnoId)) {
+        USERS.alumno = null;
+    }
+
+    if (ALUMNOS_REGISTRADOS.length !== inicial) {
+        saveAlumnos();
+        saveAlumnosPorCurso();
+    }
+
+    populateAdminDashboard();
+    showToast('Alumno eliminado', 'success');
 }
 
 // ============================================
@@ -469,7 +524,12 @@ function populateAdminDashboard() {
             <td>${esc(d.materia || '-')}</td>
             <td>${escuelasStr}</td>
             <td><span class="badge-activo">Activo</span></td>
-            <td><button class="btn btn-sm btn-outline" onclick="showResetPassword('docente', ${d.id}, '${esc(d.nombre)} ${esc(d.apellido)}')">🔑 Reset</button></td>
+            <td class="admin-action-cell">
+                <div class="admin-action-group">
+                    <button class="btn btn-sm btn-outline" onclick="showResetPassword('docente', ${d.id}, '${esc(d.nombre)} ${esc(d.apellido)}')">🔐 Modificar</button>
+                    <button class="btn btn-sm btn-danger" onclick="eliminarDocente(${d.id})">🗑 Eliminar</button>
+                </div>
+            </td>
         </tr>`;
     } else {
         docBody.innerHTML = '<tr><td colspan="8" class="empty-state">No hay docentes registrados</td></tr>';
@@ -489,7 +549,12 @@ function populateAdminDashboard() {
             <td>${esc(a.email)}</td>
             <td>${esc(a.whatsapp)}</td>
             <td><span class="badge-conectado">Registrado</span></td>
-            <td><button class="btn btn-sm btn-outline" onclick="showResetPassword('alumno', ${a.id}, '${esc(a.nombre)} ${esc(a.apellido)}')">🔑 Reset</button></td>
+            <td class="admin-action-cell">
+                <div class="admin-action-group">
+                    <button class="btn btn-sm btn-outline" onclick="showResetPassword('alumno', ${a.id}, '${esc(a.nombre)} ${esc(a.apellido)}')">🔐 Modificar</button>
+                    <button class="btn btn-sm btn-danger" onclick="eliminarAlumno(${a.id})">🗑 Eliminar</button>
+                </div>
+            </td>
         </tr>`).join('');
     } else {
         aluBody.innerHTML = '<tr><td colspan="12" class="empty-state">No hay alumnos registrados</td></tr>';
