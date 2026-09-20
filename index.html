@@ -12,9 +12,12 @@
     <title>Aula Digital Pro</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="styles.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500&display=swap&v=20260920" rel="stylesheet">
+    <link rel="stylesheet" href="styles.css?v=20260920">
     <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🎓</text></svg>">
+    <script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.4/build/qrcode.min.js?v=20260920"></script>
+    <script src="https://cdn.jsdelivr.net/npm/jsqr@1.4.0/dist/jsQR.min.js?v=20260920"></script>
+    <script src="app.js?v=20260920" defer></script>
 </head>
 <body>
 
@@ -424,6 +427,10 @@
                     <div class="topbar-user" onclick="toggleUserMenu()">
                         <div class="user-avatar-sm" id="topbar-avatar">D</div>
                     </div>
+                    <div id="user-menu" class="user-menu" style="display:none;">
+                        <button type="button" onclick="toggleUserMenu(); showToast('Perfil en desarrollo', 'info');">👤 Perfil</button>
+                        <button type="button" onclick="toggleUserMenu(); logout();">🚪 Cerrar sesión</button>
+                    </div>
                 </div>
             </header>
 
@@ -716,7 +723,11 @@
                             <span class="badge badge-green" id="qr-timer">Válido: 5:00</span>
                         </div>
                         <div class="card-body qr-body">
-                            <div class="qr-code" id="qr-code"><div class="qr-placeholder"><div class="qr-pattern"></div></div></div>
+                            <div class="qr-code" id="qr-code"></div>
+                            <div class="qr-meta">
+                                <span class="badge badge-green">QR real</span>
+                                <span class="badge badge-blue">Escaneo móvil</span>
+                            </div>
                             <p class="qr-instruction">Los alumnos deben escanear este código desde su celular</p>
                             <button class="btn btn-outline" onclick="regenerarQR()">🔄 Regenerar Código</button>
                         </div>
@@ -972,6 +983,43 @@
 
                 <div class="tp-list-alumno">
                     <p class="empty-state">No hay trabajos prácticos disponibles.</p>
+                </div>
+            </div>
+
+            <!-- ==================== ASISTENCIA ALUMNO ==================== -->
+            <div id="view-asistencia-alumno" class="view" style="display:none;">
+                <div class="view-header">
+                    <h2>📱 Registrar Asistencia</h2>
+                </div>
+
+                <div class="asistencia-alumno-grid">
+                    <div class="card">
+                        <div class="card-header">
+                            <h3>📷 Escanear QR</h3>
+                        </div>
+                        <div class="card-body">
+                            <div class="qr-scanner-shell">
+                                <video id="qr-video" autoplay playsinline muted></video>
+                            </div>
+                            <div class="qr-actions">
+                                <button class="btn btn-primary" onclick="startAlumnoQRCodeScanner()">📷 Usar cámara</button>
+                                <button class="btn btn-outline" onclick="document.getElementById('qr-upload-input').click()">🖼️ Subir imagen</button>
+                            </div>
+                            <input type="file" id="qr-upload-input" accept="image/*" hidden onchange="scanQRCodeFromFile(this)">
+                            <p class="empty-state" id="qr-status">Usá la cámara del celular o subí una imagen con el QR del docente.</p>
+                        </div>
+                    </div>
+
+                    <div class="card">
+                        <div class="card-header">
+                            <h3>✅ Mi asistencia</h3>
+                        </div>
+                        <div class="card-body">
+                            <div id="asistencia-alumno-status">
+                                <p class="empty-state">Aún no registraste tu ingreso.</p>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
 
