@@ -2126,7 +2126,32 @@ function startAlumnoQRCodeScanner() {
 }
 
 function registrarAsistenciaDesdeQR(payload) {
-    const parsed = parseAsistenciaQRPayload(payload);
+    // Normalizar payload: puede venir como payload directo, payload codificado,
+    // o como una URL que incluye ?qr=... (ej: cuando se genera con buildAsistenciaQRUrl)
+    let raw = String(payload || '');
+
+    // Si es una URL completa, extraer el parámetro 'qr' / 'payload' / 'aula'
+    try {
+        const possibleUrl = new URL(raw);
+        const qrParam = possibleUrl.searchParams.get('qr') || possibleUrl.searchParams.get('payload') || possibleUrl.searchParams.get('aula');
+        if (qrParam) raw = decodeURIComponent(qrParam);
+    } catch (e) {
+        // not a full URL, intentar extraer (?qr=... dentro de la cadena)
+        const m = raw.match(/[?&]qr=([^&]+)/);
+        if (m && m[1]) {
+            try { raw = decodeURIComponent(m[1]); } catch (e2) { raw = m[1]; }
+        }
+    }
+
+    // Intentar decodificar en caso de que venga codificado directamente
+    try {
+        const dec = decodeURIComponent(raw);
+        if (dec && dec !== raw) raw = dec;
+    } catch (e) {
+        // ignore
+    }
+
+    const parsed = parseAsistenciaQRPayload(raw);
     if (!parsed) {
         showToast('El código QR escaneado no corresponde a una asistencia válida.', 'error');
         return false;
@@ -2139,7 +2164,19 @@ function registrarAsistenciaDesdeQR(payload) {
         return false;
     }
 
-    const alumno = USERS.alumno;
+    let alumno = USERS.alumno;
+    if (!alumno) {
+        // Intentar restaurar un alumno persistido (si el navegador ya tiene datos guardados)
+        const persisted = safeGet('aulaUsers') || {};
+        if (persisted.alumno) {
+            USERS.alumno = persisted.alumno;
+            alumno = USERS.alumno;
+            // Crear sesión y mostrar la vista de alumno para redirigir automáticamente
+            saveSession('alumno', alumno);
+            showApp('alumno');
+        }
+    }
+
     if (!alumno) {
         showToast('Iniciá sesión como alumno para registrar tu asistencia.', 'info');
         return false;
@@ -2181,7 +2218,7 @@ function registrarAsistenciaDesdeQR(payload) {
     saveAsistencias();
     renderAsistenciaHistorial();
     renderAlumnoAsistenciaStatus();
-    showToast(`Asistencia registrada en ${parsed.curso}.`, 'success');
+    showToast(`Bienvenida a clases, ${esc(alumno.nombre)} ${esc(alumno.apellido)}. Asistencia registrada en ${parsed.curso}.`, 'success');
     return true;
 }
 
