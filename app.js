@@ -1731,8 +1731,14 @@ function buildAsistenciaQRPayload() {
 
 function buildAsistenciaQRUrl(payload) {
     const rawBase = window.location.href.split('?')[0].split('#')[0];
-    const base = rawBase && rawBase !== 'about:blank' ? rawBase : 'https://auladigital.local';
-    return `${base}?qr=${encodeURIComponent(payload)}`;
+    const publicBase = 'https://manzamario.github.io/aula-digital-pro/';
+
+    if (rawBase && /^https?:\/\//i.test(rawBase)) {
+        const normalized = rawBase.replace(/index\.html$/i, '').replace(/\/$/, '');
+        return `${normalized}/?qr=${encodeURIComponent(payload)}`;
+    }
+
+    return `${publicBase}?qr=${encodeURIComponent(payload)}`;
 }
 
 function parseAsistenciaQRPayload(rawValue) {
