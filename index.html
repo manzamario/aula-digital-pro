@@ -651,8 +651,9 @@
                 <div class="card" style="margin-bottom:1.5rem;">
                     <div class="card-header">
                         <h3>👤 Docentes Registrados</h3>
-                        <div style="display:flex; align-items:center; gap:0.75rem;">
+                        <div style="display:flex; align-items:center; gap:0.75rem; flex-wrap:wrap;">
                             <span class="badge badge-blue" id="admin-badge-docentes">0 registros</span>
+                            <button class="btn btn-danger btn-sm" onclick="eliminarDocentesSeleccionados()">🗑️ Eliminar Seleccionados</button>
                             <button class="btn btn-danger btn-sm" onclick="resetTodaLaBaseDeDatos()">🗑️ Eliminar Todo</button>
                         </div>
                     </div>
@@ -660,6 +661,7 @@
                         <table class="db-table" id="admin-table-docentes">
                             <thead>
                                 <tr>
+                                    <th class="admin-check-head">Sel</th>
                                     <th>ID</th>
                                     <th>Nombre</th>
                                     <th>Apellido</th>
@@ -671,7 +673,7 @@
                                 </tr>
                             </thead>
                             <tbody id="admin-docentes-body">
-                                <tr><td colspan="8" class="empty-state">No hay docentes registrados</td></tr>
+                                <tr><td colspan="9" class="empty-state">No hay docentes registrados</td></tr>
                             </tbody>
                         </table>
                     </div>
@@ -681,12 +683,16 @@
                 <div class="card">
                     <div class="card-header">
                         <h3>🎓 Alumnos Registrados</h3>
-                        <span class="badge badge-green" id="admin-badge-alumnos">0 registros</span>
+                        <div style="display:flex; align-items:center; gap:0.75rem; flex-wrap:wrap;">
+                            <span class="badge badge-green" id="admin-badge-alumnos">0 registros</span>
+                            <button class="btn btn-danger btn-sm" onclick="eliminarAlumnosSeleccionados()">🗑️ Eliminar Seleccionados</button>
+                        </div>
                     </div>
                     <div class="card-body" style="overflow-x:auto;">
                         <table class="db-table" id="admin-table-alumnos">
                             <thead>
                                 <tr>
+                                    <th class="admin-check-head">Sel</th>
                                     <th>ID</th>
                                     <th>Nombre</th>
                                     <th>Apellido</th>
@@ -702,7 +708,7 @@
                                 </tr>
                             </thead>
                             <tbody id="admin-alumnos-body">
-                                <tr><td colspan="12" class="empty-state">No hay alumnos registrados</td></tr>
+                                <tr><td colspan="13" class="empty-state">No hay alumnos registrados</td></tr>
                             </tbody>
                         </table>
                     </div>

@@ -3122,7 +3122,7 @@ input, select, textarea, button {
     font-family: 'JetBrains Mono', monospace;
     background: #fff;
     border: 1px solid #d1d5db;
-    min-width: 920px;
+    min-width: 980px;
 }
 .db-table thead {
     background: linear-gradient(180deg, #4f46e5 0%, #3730a3 100%);
@@ -3158,6 +3158,19 @@ input, select, textarea, button {
     font-style: italic;
     padding: 1.5rem;
     font-family: 'Inter', sans-serif;
+}
+.db-table .admin-check-head,
+.db-table .admin-check-cell {
+    width: 52px;
+    text-align: center;
+    padding-left: 0.35rem;
+    padding-right: 0.35rem;
+}
+.db-table .admin-selection-checkbox {
+    width: 16px;
+    height: 16px;
+    accent-color: #4f46e5;
+    cursor: pointer;
 }
 .db-table .admin-action-cell {
     min-width: 220px;
