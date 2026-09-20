@@ -8,6 +8,8 @@
 // ============================================
 // STATE
 // ============================================
+const APP_VERSION = '20260920';
+
 const AppState = {
     currentScreen: 'splash',
     currentView: null,
@@ -1732,13 +1734,11 @@ function buildAsistenciaQRPayload() {
 function buildAsistenciaQRUrl(payload) {
     const rawBase = window.location.href.split('?')[0].split('#')[0];
     const publicBase = 'https://manzamario.github.io/aula-digital-pro/';
+    const baseUrl = new URL(rawBase && /^https?:\/\//i.test(rawBase) ? rawBase : publicBase);
 
-    if (rawBase && /^https?:\/\//i.test(rawBase)) {
-        const normalized = rawBase.replace(/index\.html$/i, '').replace(/\/$/, '');
-        return `${normalized}/?qr=${encodeURIComponent(payload)}`;
-    }
-
-    return `${publicBase}?qr=${encodeURIComponent(payload)}`;
+    baseUrl.searchParams.set('v', APP_VERSION);
+    baseUrl.searchParams.set('qr', payload);
+    return baseUrl.toString();
 }
 
 function parseAsistenciaQRPayload(rawValue) {
