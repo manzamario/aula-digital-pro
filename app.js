@@ -32,6 +32,8 @@ const AppState = {
     alumnoQrStream: null,
     sessionToken: null,
     sessionExpiresAt: null,
+    lastActivity: Date.now(),
+    idleTimeoutMs: 15 * 60 * 1000,
     loginAttempts: {
         docente: { count: 0, lockUntil: null },
         alumno: { count: 0, lockUntil: null },
@@ -97,6 +99,7 @@ function saveSession(role, user) {
     AppState.currentUser = user;
     AppState.sessionToken = token;
     AppState.sessionExpiresAt = Date.now() + 60 * 60 * 1000;
+    AppState.lastActivity = Date.now();
 
     sessionStorage.setItem('aulaSession', JSON.stringify({
         role,
@@ -106,11 +109,24 @@ function saveSession(role, user) {
     }));
 }
 
+function refreshSessionLifetime() {
+    if (!AppState.currentRole || !AppState.sessionToken) return;
+    AppState.lastActivity = Date.now();
+    AppState.sessionExpiresAt = Date.now() + 60 * 60 * 1000;
+    sessionStorage.setItem('aulaSession', JSON.stringify({
+        role: AppState.currentRole,
+        userId: AppState.currentUser?.id ?? null,
+        token: AppState.sessionToken,
+        expiresAt: AppState.sessionExpiresAt
+    }));
+}
+
 function clearSession() {
     AppState.currentRole = null;
     AppState.currentUser = null;
     AppState.sessionToken = null;
     AppState.sessionExpiresAt = null;
+    AppState.lastActivity = Date.now();
     sessionStorage.removeItem('aulaSession');
 }
 
@@ -149,6 +165,24 @@ function isSessionValid() {
         return false;
     }
     return true;
+}
+
+function initActivityTracking() {
+    const activityEvents = ['pointerdown', 'keydown', 'scroll', 'touchstart'];
+    activityEvents.forEach(eventName => {
+        document.addEventListener(eventName, () => {
+            if (!AppState.currentRole) return;
+            AppState.lastActivity = Date.now();
+            if (AppState.sessionExpiresAt) refreshSessionLifetime();
+        }, { passive: true });
+    });
+
+    setInterval(() => {
+        if (!AppState.currentRole || !AppState.sessionExpiresAt) return;
+        if (Date.now() - AppState.lastActivity > AppState.idleTimeoutMs) {
+            logout();
+        }
+    }, 30000);
 }
 
 function blockIfUnauthorized(role) {
@@ -260,7 +294,8 @@ function safeGet(key) {
 function saveUsers() {
     const toSave = {
         docente: USERS.docente ? { ...USERS.docente, password: undefined, passwordHash: USERS.docente.passwordHash } : null,
-        alumno: USERS.alumno ? { ...USERS.alumno, password: undefined, passwordHash: USERS.alumno.passwordHash } : null
+        alumno: USERS.alumno ? { ...USERS.alumno, password: undefined, passwordHash: USERS.alumno.passwordHash } : null,
+        admin: USERS.admin ? { ...USERS.admin, password: undefined, passwordHash: USERS.admin.passwordHash } : null
     };
     safeSet('aulaUsers', toSave);
 }
@@ -668,6 +703,34 @@ function toggleSidebar() {
 // VIEW MANAGEMENT
 // ============================================
 function showView(viewId) {
+    const roleAccess = {
+        'view-dashboard-docente': 'docente',
+        'view-gestionar-alumnos': 'docente',
+        'view-asistencia': 'docente',
+        'view-materiales': 'docente',
+        'view-tp': 'docente',
+        'view-examenes': 'docente',
+        'view-aula-controlada': 'docente',
+        'view-panel-realtime': 'docente',
+        'view-dashboard-alumno': 'alumno',
+        'view-material-alumno': 'alumno',
+        'view-tp-alumno': 'alumno',
+        'view-asistencia-alumno': 'alumno',
+        'view-examen-alumno': 'alumno',
+        'view-notas-alumno': 'alumno',
+        'view-dashboard-admin': 'admin'
+    };
+
+    if (roleAccess[viewId] && AppState.currentRole !== roleAccess[viewId]) {
+        showToast('No tenés permisos para acceder a esta vista.', 'error');
+        if (AppState.currentRole) {
+            showApp(AppState.currentRole);
+        } else {
+            showScreen('screen-welcome');
+        }
+        return;
+    }
+
     document.querySelectorAll('.view').forEach(v => v.style.display = 'none');
 
     const view = document.getElementById(viewId);
@@ -1144,18 +1207,28 @@ document.getElementById('login-form-alumno')?.addEventListener('submit', functio
 // ============================================
 document.getElementById('login-form-admin')?.addEventListener('submit', function(e) {
     e.preventDefault();
-    const email = document.getElementById('login-admin-email').value.trim();
+    const email = normalizeText(document.getElementById('login-admin-email').value).toLowerCase();
     const password = document.getElementById('login-admin-password').value;
+    const role = 'admin';
+
+    if (getLoginAttemptState(role).lockUntil && Date.now() < getLoginAttemptState(role).lockUntil) {
+        showToast('Este usuario está temporalmente bloqueado por demasiados intentos.', 'warning');
+        return;
+    }
 
     if (email !== USERS.admin.email) {
+        registerFailedAttempt(role);
         showToast('Email de administrador no encontrado', 'error');
         return;
     }
 
     if (USERS.admin.passwordHash !== simpleHash(password)) {
+        registerFailedAttempt(role);
         showToast('Contraseña de administrador incorrecta', 'error');
         return;
     }
+    registerSuccessAttempt(role);
+    saveSession(role, USERS.admin);
     showApp('admin');
     showToast(`¡Bienvenido, ${USERS.admin.emailCompleto}!`, 'success');
 });
