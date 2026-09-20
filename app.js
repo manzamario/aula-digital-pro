@@ -382,6 +382,43 @@ function aplicarResetPassword() {
     }
 }
 
+function eliminarDocente(docenteId) {
+    if (!confirm('¿Querés eliminar este docente y su acceso?')) return;
+
+    if (USERS.docente && Number(USERS.docente.id) === Number(docenteId)) {
+        USERS.docente = null;
+        saveUsers();
+    }
+
+    populateAdminDashboard();
+    showToast('Docente eliminado', 'success');
+}
+
+function eliminarAlumno(alumnoId) {
+    if (!confirm('¿Querés eliminar este alumno de la base de datos?')) return;
+
+    const inicial = ALUMNOS_REGISTRADOS.length;
+    ALUMNOS_REGISTRADOS = ALUMNOS_REGISTRADOS.filter(a => Number(a.id) !== Number(alumnoId));
+    Object.keys(ALUMNOS_POR_CURSO).forEach(cursoId => {
+        ALUMNOS_POR_CURSO[cursoId] = (ALUMNOS_POR_CURSO[cursoId] || []).filter(a => Number(a.id) !== Number(alumnoId));
+        if (ALUMNOS_POR_CURSO[cursoId].length === 0) {
+            delete ALUMNOS_POR_CURSO[cursoId];
+        }
+    });
+
+    if (USERS.alumno && Number(USERS.alumno.id) === Number(alumnoId)) {
+        USERS.alumno = null;
+    }
+
+    if (ALUMNOS_REGISTRADOS.length !== inicial) {
+        saveAlumnos();
+        saveAlumnosPorCurso();
+    }
+
+    populateAdminDashboard();
+    showToast('Alumno eliminado', 'success');
+}
+
 // ============================================
 // SPLASH SCREEN
 // ============================================
@@ -487,7 +524,12 @@ function populateAdminDashboard() {
             <td>${esc(d.materia || '-')}</td>
             <td>${escuelasStr}</td>
             <td><span class="badge-activo">Activo</span></td>
-            <td><button class="btn btn-sm btn-outline" onclick="showResetPassword('docente', ${d.id}, '${esc(d.nombre)} ${esc(d.apellido)}')">� Modificar</button></td>
+            <td class="admin-action-cell">
+                <div class="admin-action-group">
+                    <button class="btn btn-sm btn-outline" onclick="showResetPassword('docente', ${d.id}, '${esc(d.nombre)} ${esc(d.apellido)}')">🔐 Modificar</button>
+                    <button class="btn btn-sm btn-danger" onclick="eliminarDocente(${d.id})">🗑 Eliminar</button>
+                </div>
+            </td>
         </tr>`;
     } else {
         docBody.innerHTML = '<tr><td colspan="8" class="empty-state">No hay docentes registrados</td></tr>';
@@ -507,7 +549,12 @@ function populateAdminDashboard() {
             <td>${esc(a.email)}</td>
             <td>${esc(a.whatsapp)}</td>
             <td><span class="badge-conectado">Registrado</span></td>
-            <td><button class="btn btn-sm btn-outline" onclick="showResetPassword('alumno', ${a.id}, '${esc(a.nombre)} ${esc(a.apellido)}')">� Modificar</button></td>
+            <td class="admin-action-cell">
+                <div class="admin-action-group">
+                    <button class="btn btn-sm btn-outline" onclick="showResetPassword('alumno', ${a.id}, '${esc(a.nombre)} ${esc(a.apellido)}')">🔐 Modificar</button>
+                    <button class="btn btn-sm btn-danger" onclick="eliminarAlumno(${a.id})">🗑 Eliminar</button>
+                </div>
+            </td>
         </tr>`).join('');
     } else {
         aluBody.innerHTML = '<tr><td colspan="12" class="empty-state">No hay alumnos registrados</td></tr>';

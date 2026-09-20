@@ -1048,7 +1048,7 @@ input, select, textarea, button {
    VIEWS
    ============================================ */
 .view {
-    padding: 2rem;
+    padding: 1.25rem 1.5rem 2rem;
     animation: fadeIn 0.3s ease;
 }
 
@@ -1098,9 +1098,9 @@ input, select, textarea, button {
 /* Stats Grid */
 .stats-grid {
     display: grid;
-    grid-template-columns: repeat(4, 1fr);
-    gap: 1.25rem;
-    margin-bottom: 2rem;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 1rem;
+    margin-bottom: 1.5rem;
 }
 
 .stats-grid-3 {
@@ -1176,17 +1176,19 @@ input, select, textarea, button {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    padding: 1.25rem 1.5rem;
+    padding: 0.85rem 1rem;
     border-bottom: 1px solid var(--border-light);
+    gap: 0.75rem;
+    flex-wrap: wrap;
 }
 
 .card-header h3 {
-    font-size: 1rem;
+    font-size: 0.96rem;
     font-weight: 700;
 }
 
 .card-body {
-    padding: 1.5rem;
+    padding: 1rem;
 }
 
 .card-wide {
@@ -3116,20 +3118,21 @@ input, select, textarea, button {
 .db-table {
     width: 100%;
     border-collapse: collapse;
-    font-size: 0.82rem;
+    font-size: 0.76rem;
     font-family: 'JetBrains Mono', monospace;
     background: #fff;
     border: 1px solid #d1d5db;
+    min-width: 920px;
 }
 .db-table thead {
     background: linear-gradient(180deg, #4f46e5 0%, #3730a3 100%);
     color: #fff;
 }
 .db-table th {
-    padding: 0.6rem 0.8rem;
+    padding: 0.55rem 0.7rem;
     text-align: left;
     font-weight: 600;
-    font-size: 0.75rem;
+    font-size: 0.72rem;
     text-transform: uppercase;
     letter-spacing: 0.05em;
     border-right: 1px solid rgba(255,255,255,0.15);
@@ -3137,13 +3140,14 @@ input, select, textarea, button {
 }
 .db-table th:last-child { border-right: none; }
 .db-table td {
-    padding: 0.5rem 0.8rem;
+    padding: 0.45rem 0.6rem;
     border-bottom: 1px solid #e5e7eb;
     border-right: 1px solid #f3f4f6;
     white-space: nowrap;
-    max-width: 200px;
+    max-width: 160px;
     overflow: hidden;
     text-overflow: ellipsis;
+    vertical-align: middle;
 }
 .db-table tbody tr:nth-child(even) { background: #f8fafc; }
 .db-table tbody tr:nth-child(odd) { background: #fff; }
@@ -3152,8 +3156,35 @@ input, select, textarea, button {
     text-align: center;
     color: #94a3b8;
     font-style: italic;
-    padding: 2rem;
+    padding: 1.5rem;
     font-family: 'Inter', sans-serif;
+}
+.db-table .admin-action-cell {
+    min-width: 220px;
+    white-space: normal;
+}
+.db-table .admin-action-group {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.35rem;
+    min-width: 210px;
+}
+.db-table .admin-action-group .btn {
+    margin: 0.1rem 0;
+    min-width: 90px;
+}
+#view-dashboard-admin .card {
+    min-width: 0;
+}
+#view-dashboard-admin .card-body {
+    overflow-x: auto;
+}
+
+@media (max-width: 1200px) {
+    .stats-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
 }
 .db-table .badge-activo {
     background: #dcfce7;
