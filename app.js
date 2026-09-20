@@ -979,7 +979,11 @@ function renderMateriales() {
         const icon = m.tipo === 'PDF' ? '📄' : m.tipo === 'Video (enlace)' ? '🎬' : '📝';
         return `<div class="card" style="margin-bottom:1rem;">
             <div class="card-header"><h3>${icon} ${esc(m.titulo)}</h3><span class="badge badge-blue">${esc(m.tipo)}</span></div>
-            <div class="card-body"><p style="font-size:0.85rem;color:var(--text-muted);">${esc(m.descripcion || 'Sin descripción')}</p><p style="font-size:0.75rem;color:#94a3b8;margin-top:0.5rem;">📅 ${fecha}</p></div>
+            <div class="card-body"><p style="font-size:0.85rem;color:var(--text-muted);">${esc(m.descripcion || 'Sin descripción')}</p><p style="font-size:0.75rem;color:#94a3b8;margin-top:0.5rem;">📅 ${fecha}</p>
+                <div style="margin-top:0.75rem; display:flex; justify-content:flex-end;">
+                    <button class="btn btn-danger btn-sm" onclick="eliminarMaterial(${m.id})">🗑️ Eliminar</button>
+                </div>
+            </div>
         </div>`;
     }).join('');
 }
@@ -998,15 +1002,15 @@ function renderTP() {
 
     if (pendientes) {
         pendientes.innerHTML = tpPendientes.length === 0 ? '<p class="empty-state">No hay TP pendientes.</p>'
-            : tpPendientes.map(t => `<div class="card" style="margin-bottom:1rem;"><div class="card-header"><h3>📝 ${esc(t.titulo)}</h3><span class="badge badge-orange">Pendiente</span></div><div class="card-body"><p style="font-size:0.85rem;">${esc(t.descripcion || '')}</p>${t.fechaEntrega ? `<p style="font-size:0.75rem;color:#94a3b8;margin-top:0.5rem;">📅 Entrega: ${esc(t.fechaEntrega)}</p>` : ''}</div></div>`).join('');
+            : tpPendientes.map(t => `<div class="card" style="margin-bottom:1rem;"><div class="card-header"><h3>📝 ${esc(t.titulo)}</h3><span class="badge badge-orange">Pendiente</span></div><div class="card-body"><p style="font-size:0.85rem;">${esc(t.descripcion || '')}</p>${t.fechaEntrega ? `<p style="font-size:0.75rem;color:#94a3b8;margin-top:0.5rem;">📅 Entrega: ${esc(t.fechaEntrega)}</p>` : ''}<div style="margin-top:0.75rem; display:flex; justify-content:flex-end;"><button class="btn btn-danger btn-sm" onclick="eliminarTP(${t.id})">🗑️ Eliminar</button></div></div></div>`).join('');
     }
     if (entregados) {
         entregados.innerHTML = tpEntregados.length === 0 ? '<p class="empty-state">No hay TP entregados.</p>'
-            : tpEntregados.map(t => `<div class="card" style="margin-bottom:1rem;"><div class="card-header"><h3>📝 ${esc(t.titulo)}</h3><span class="badge badge-blue">Entregado</span></div><div class="card-body"><p style="font-size:0.85rem;">${esc(t.descripcion || '')}</p></div></div>`).join('');
+            : tpEntregados.map(t => `<div class="card" style="margin-bottom:1rem;"><div class="card-header"><h3>📝 ${esc(t.titulo)}</h3><span class="badge badge-blue">Entregado</span></div><div class="card-body"><p style="font-size:0.85rem;">${esc(t.descripcion || '')}</p><div style="margin-top:0.75rem; display:flex; justify-content:flex-end;"><button class="btn btn-danger btn-sm" onclick="eliminarTP(${t.id})">🗑️ Eliminar</button></div></div></div>`).join('');
     }
     if (corregidos) {
         corregidos.innerHTML = tpCorregidos.length === 0 ? '<p class="empty-state">No hay TP corregidos.</p>'
-            : tpCorregidos.map(t => `<div class="card" style="margin-bottom:1rem;"><div class="card-header"><h3>📝 ${esc(t.titulo)}</h3><span class="badge badge-green">Corregido</span></div></div>`).join('');
+            : tpCorregidos.map(t => `<div class="card" style="margin-bottom:1rem;"><div class="card-header"><h3>📝 ${esc(t.titulo)}</h3><span class="badge badge-green">Corregido</span></div><div class="card-body"><div style="display:flex; justify-content:flex-end;"><button class="btn btn-danger btn-sm" onclick="eliminarTP(${t.id})">🗑️ Eliminar</button></div></div></div>`).join('');
     }
 }
 
@@ -1611,6 +1615,54 @@ function crearTP() {
     closeAllModals();
     renderTP();
     showToast('Trabajo Práctico creado correctamente', 'success');
+}
+
+function eliminarMaterial(materialId) {
+    if (!confirm('¿Querés eliminar este material de estudio?')) return;
+    MATERIALES = MATERIALES.filter(item => Number(item.id) !== Number(materialId));
+    saveMateriales();
+    renderMateriales();
+    showToast('Material eliminado', 'success');
+}
+
+function eliminarTP(tpId) {
+    if (!confirm('¿Querés eliminar este trabajo práctico?')) return;
+    TRABAJOS_PRACTICOS = TRABAJOS_PRACTICOS.filter(item => Number(item.id) !== Number(tpId));
+    saveTP();
+    renderTP();
+    showToast('Trabajo práctico eliminado', 'success');
+}
+
+function resetTodaLaBaseDeDatos() {
+    if (!confirm('⚠️ Esta acción elimina toda la base de datos local. ¿Seguro que querés continuar?')) return;
+
+    USERS.docente = null;
+    USERS.alumno = null;
+    ALUMNOS_REGISTRADOS = [];
+    CURSOS = [];
+    MATERIALES = [];
+    TRABAJOS_PRACTICOS = [];
+    EXAMENES = [];
+    ASISTENCIAS = [];
+    ALUMNOS_POR_CURSO = {};
+    PREGUNTAS_BANCO = [];
+
+    localStorage.removeItem('aulaUsers');
+    localStorage.removeItem('aulaAlumnos');
+    localStorage.removeItem('aulaCursos');
+    localStorage.removeItem('aulaMateriales');
+    localStorage.removeItem('aulaTP');
+    localStorage.removeItem('aulaExamenes');
+    localStorage.removeItem('aulaAsistencias');
+    localStorage.removeItem('aulaAlumnosPorCurso');
+    localStorage.removeItem('aulaPreguntas');
+    sessionStorage.removeItem('aulaSession');
+
+    populateAdminDashboard();
+    renderMateriales();
+    renderTP();
+    showScreen('screen-welcome');
+    showToast('Se eliminó toda la base de datos.', 'warning');
 }
 
 // ============================================
