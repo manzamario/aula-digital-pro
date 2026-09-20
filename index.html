@@ -1260,13 +1260,14 @@
             <div class="modal-header"><h3>🔑 Restablecer Contraseña</h3><button class="modal-close" onclick="closeAllModals()">✕</button></div>
             <div class="modal-body">
                 <p style="margin-bottom:1rem;">Usuario: <strong id="reset-user-name"></strong></p>
+                <p style="margin-bottom:1rem; color:var(--text-secondary);">El administrador puede restablecer la contraseña sin enviar mail.</p>
                 <form id="form-reset-password">
                     <input type="hidden" id="reset-user-type">
                     <input type="hidden" id="reset-user-id">
-                    <div class="form-group"><label>Nueva Contraseña *</label><input type="text" id="reset-new-password" required placeholder="Mínimo 8 caracteres" minlength="8"></div>
+                    <div class="form-group"><label>Nueva Contraseña *</label><input type="text" id="reset-new-password" required placeholder="Ej: NuevaClave2026!" minlength="8"></div>
                 </form>
             </div>
-            <div class="modal-footer"><button class="btn btn-outline" onclick="closeAllModals()">Cancelar</button><button class="btn btn-primary" onclick="aplicarResetPassword()">🔑 Aplicar Contraseña</button></div>
+            <div class="modal-footer"><button class="btn btn-outline" onclick="closeAllModals()">Cancelar</button><button class="btn btn-primary" onclick="aplicarResetPassword()">🔐 Aplicar Contraseña</button></div>
         </div>
 
         <div class="modal" id="modal-resultado-examen" onclick="event.stopPropagation()" style="display:none;">
