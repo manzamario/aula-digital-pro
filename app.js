@@ -1994,6 +1994,8 @@ function generarQR() {
         const canvas = document.createElement('canvas');
         canvas.width = 180;
         canvas.height = 180;
+        canvas.setAttribute('aria-label', 'Código QR de asistencia');
+        canvas.title = 'Código QR de asistencia';
 
         QRCode.toCanvas(canvas, qrUrl, {
             width: 180,
