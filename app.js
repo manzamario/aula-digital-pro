@@ -15,6 +15,7 @@ const AppState = {
     currentUser: null,
     sidebarOpen: false,
     notificationsOpen: false,
+    userMenuOpen: false,
     aulaControlada: false,
     examenActual: {
         preguntaActual: 0,
@@ -27,7 +28,19 @@ const AppState = {
     qrTimeLeft: 300,
     exitTimeout: null,
     examenTimer: null,
-    realtimeInterval: null
+    realtimeInterval: null,
+    alumnoQrStream: null,
+    sessionToken: null,
+    sessionExpiresAt: null,
+    loginAttempts: {
+        docente: { count: 0, lockUntil: null },
+        alumno: { count: 0, lockUntil: null },
+        admin: { count: 0, lockUntil: null }
+    },
+    notifications: [
+        { id: 1, type: 'info', title: 'Bienvenido', text: 'La plataforma está lista para trabajar.', time: 'Ahora' },
+        { id: 2, type: 'success', title: 'Sistema', text: 'Los registros se guardan localmente en tu navegador.', time: 'Hoy' }
+    ]
 };
 
 // ============================================
@@ -54,6 +67,143 @@ function simpleHash(str) {
         hash |= 0;
     }
     return 'h_' + Math.abs(hash).toString(36);
+}
+
+function normalizeText(value) {
+    return String(value ?? '').trim().replace(/\s+/g, ' ');
+}
+
+function isValidEmail(value) {
+    return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(String(value ?? '').trim());
+}
+
+function isStrongPassword(password) {
+    return typeof password === 'string' && password.length >= 8 && /[A-Z]/.test(password) && /[a-z]/.test(password) && /\d/.test(password);
+}
+
+function generateSessionToken() {
+    try {
+        const random = new Uint32Array(8);
+        crypto.getRandomValues(random);
+        return Array.from(random).map(n => n.toString(16).padStart(8, '0')).join('');
+    } catch (e) {
+        return `sess_${Date.now()}_${Math.random().toString(36).slice(2, 12)}`;
+    }
+}
+
+function saveSession(role, user) {
+    const token = generateSessionToken();
+    AppState.currentRole = role;
+    AppState.currentUser = user;
+    AppState.sessionToken = token;
+    AppState.sessionExpiresAt = Date.now() + 60 * 60 * 1000;
+
+    sessionStorage.setItem('aulaSession', JSON.stringify({
+        role,
+        userId: user?.id ?? null,
+        token,
+        expiresAt: AppState.sessionExpiresAt
+    }));
+}
+
+function clearSession() {
+    AppState.currentRole = null;
+    AppState.currentUser = null;
+    AppState.sessionToken = null;
+    AppState.sessionExpiresAt = null;
+    sessionStorage.removeItem('aulaSession');
+}
+
+function restoreSession() {
+    try {
+        const raw = sessionStorage.getItem('aulaSession');
+        if (!raw) return false;
+        const data = JSON.parse(raw);
+        if (!data || !data.role || !data.userId || !data.token) return false;
+        if (Date.now() > (data.expiresAt || 0)) {
+            clearSession();
+            return false;
+        }
+
+        const target = data.role === 'docente' ? USERS.docente : data.role === 'alumno' ? USERS.alumno : USERS.admin;
+        if (!target || Number(target.id) !== Number(data.userId)) {
+            clearSession();
+            return false;
+        }
+
+        AppState.currentRole = data.role;
+        AppState.currentUser = target;
+        AppState.sessionToken = data.token;
+        AppState.sessionExpiresAt = data.expiresAt;
+        return true;
+    } catch (e) {
+        clearSession();
+        return false;
+    }
+}
+
+function isSessionValid() {
+    if (!AppState.sessionToken || !AppState.currentUser || !AppState.currentRole) return false;
+    if (!AppState.sessionExpiresAt || Date.now() > AppState.sessionExpiresAt) {
+        clearSession();
+        return false;
+    }
+    return true;
+}
+
+function blockIfUnauthorized(role) {
+    if (!isSessionValid() || AppState.currentRole !== role) {
+        clearSession();
+        showScreen('screen-welcome');
+        showToast('Sesión inválida o expirada. Volvé a iniciar sesión.', 'error');
+        return false;
+    }
+    return true;
+}
+
+function getLoginAttemptState(role) {
+    const attempts = AppState.loginAttempts[role] || { count: 0, lockUntil: null };
+    return attempts;
+}
+
+function registerFailedAttempt(role) {
+    const state = AppState.loginAttempts[role] || { count: 0, lockUntil: null };
+    const now = Date.now();
+    if (state.lockUntil && now < state.lockUntil) return true;
+    state.count += 1;
+    if (state.count >= 5) {
+        state.lockUntil = now + 10 * 60 * 1000;
+        state.count = 5;
+        showToast('Máximo de intentos superado. Esperá 10 minutos antes de volver a intentar.', 'warning');
+        return true;
+    }
+    AppState.loginAttempts[role] = state;
+    return false;
+}
+
+function registerSuccessAttempt(role) {
+    AppState.loginAttempts[role] = { count: 0, lockUntil: null };
+}
+
+function renderNotifications() {
+    const panel = document.getElementById('notifications-panel');
+    const list = panel?.querySelector('.notif-list');
+    if (!list) return;
+
+    if (!AppState.notifications || AppState.notifications.length === 0) {
+        list.innerHTML = '<p class="empty-state">No hay notificaciones.</p>';
+        return;
+    }
+
+    list.innerHTML = AppState.notifications.map(item => `
+        <div class="notif-item ${item.type === 'info' ? 'unread' : ''}">
+            <div class="notif-icon">${item.type === 'success' ? '✅' : item.type === 'warning' ? '⚠️' : 'ℹ️'}</div>
+            <div class="notif-content">
+                <p>${esc(item.title)}</p>
+                <small>${esc(item.text)} · ${esc(item.time)}</small>
+            </div>
+        </div>
+    `).join('');
 }
 
 // ============================================
@@ -194,6 +344,17 @@ function aplicarResetPassword() {
 // ============================================
 function initApp() {
     loadPersistedData();
+    renderNotifications();
+    try {
+        const restored = restoreSession();
+        if (restored && AppState.currentRole && AppState.currentUser) {
+            showApp(AppState.currentRole);
+            return;
+        }
+    } catch (e) {
+        console.warn('[AulaDigital] No se pudo restaurar sesión:', e);
+    }
+    initQRCodeReaderFromUrl();
     setTimeout(() => {
         const splash = document.getElementById('splash-screen');
         if (splash) splash.style.display = 'none';
@@ -220,15 +381,23 @@ function showScreen(screenId) {
 }
 
 function showApp(role) {
+    if (!USERS[role]) {
+        showScreen('screen-welcome');
+        showToast('No existe un usuario activo para este rol.', 'error');
+        return;
+    }
+
     document.querySelectorAll('.screen').forEach(s => s.style.display = 'none');
     const appContainer = document.getElementById('app-container');
     if (appContainer) appContainer.style.display = 'flex';
 
     AppState.currentRole = role;
     AppState.currentUser = USERS[role];
+    saveSession(role, USERS[role]);
 
     buildSidebar(role);
     updateUserInfo(role);
+    renderNotifications();
 
     if (role === 'docente') {
         showView('view-dashboard-docente');
@@ -375,6 +544,8 @@ function updateAlumnoDashboard() {
     if (stats[0]) stats[0].textContent = CURSOS.length;
     if (stats[1]) stats[1].textContent = TRABAJOS_PRACTICOS.filter(t => t.estado === 'pendiente').length;
     if (stats[2]) stats[2].textContent = '0';
+
+    renderAlumnoAsistenciaStatus();
 }
 
 // ============================================
@@ -431,6 +602,9 @@ function buildSidebar(role) {
             </div>
             <div class="nav-item" onclick="showView('view-tp-alumno')" data-view="view-tp-alumno">
                 <span class="nav-icon">📝</span> Mis Trabajos Prácticos
+            </div>
+            <div class="nav-item" onclick="showView('view-asistencia-alumno')" data-view="view-asistencia-alumno">
+                <span class="nav-icon">📱</span> Asistencia
             </div>
             <div class="nav-item" onclick="showView('view-examen-alumno')" data-view="view-examen-alumno">
                 <span class="nav-icon">📊</span> Rendir Examen
@@ -517,6 +691,7 @@ function showView(viewId) {
         'view-examen-alumno': 'Examen en Curso',
         'view-material-alumno': 'Mis Materiales',
         'view-tp-alumno': 'Mis Trabajos Prácticos',
+        'view-asistencia-alumno': 'Registrar Asistencia',
         'view-notas-alumno': 'Mis Notas'
     };
 
@@ -550,6 +725,8 @@ function initViewContent(viewId) {
         populateAulaCursos();
     } else if (viewId === 'view-panel-realtime') {
         populateRealtimeExamenes();
+    } else if (viewId === 'view-asistencia-alumno') {
+        renderAlumnoAsistenciaStatus();
     }
 }
 
@@ -890,25 +1067,36 @@ function loadRealtimePanel() {
 // ============================================
 document.getElementById('login-form-docente')?.addEventListener('submit', function(e) {
     e.preventDefault();
-    const email = document.getElementById('login-docente-email').value.trim();
+    const email = normalizeText(document.getElementById('login-docente-email').value).toLowerCase();
     const password = document.getElementById('login-docente-password').value;
-    const user = USERS.docente;
+    const role = 'docente';
+    const attempt = getLoginAttemptState(role);
+    if (attempt.lockUntil && Date.now() < attempt.lockUntil) {
+        showToast('Este usuario está temporalmente bloqueado por demasiados intentos.', 'warning');
+        return;
+    }
 
+    const user = USERS.docente;
     if (!user || user.email !== email) {
+        registerFailedAttempt(role);
         showToast('No se encontró una cuenta con ese email. Registrate primero.', 'error');
         return;
     }
 
     if (user.passwordHash !== simpleHash(password) && user.password !== password) {
+        registerFailedAttempt(role);
         showToast('Contraseña incorrecta', 'error');
         return;
     }
     if (!user.passwordHash) { user.passwordHash = simpleHash(password); saveUsers(); }
 
+    registerSuccessAttempt(role);
     if (user.escuelas.length > 1) {
+        saveSession(role, user);
         showSchoolSelector(user);
     } else {
         user.escuelaActual = user.escuelas[0];
+        saveSession(role, user);
         showApp('docente');
     }
     showToast(`¡Bienvenido, Prof. ${user.apellido}!`, 'success');
@@ -919,23 +1107,34 @@ document.getElementById('login-form-docente')?.addEventListener('submit', functi
 // ============================================
 document.getElementById('login-form-alumno')?.addEventListener('submit', function(e) {
     e.preventDefault();
-    const email = document.getElementById('login-alumno-email').value.trim();
+    const email = normalizeText(document.getElementById('login-alumno-email').value).toLowerCase();
     const password = document.getElementById('login-alumno-password').value;
-    const alumno = ALUMNOS_REGISTRADOS.find(a => a.email === email || a.dni === email);
+    const role = 'alumno';
+
+    if (getLoginAttemptState(role).lockUntil && Date.now() < getLoginAttemptState(role).lockUntil) {
+        showToast('Este usuario está temporalmente bloqueado por demasiados intentos.', 'warning');
+        return;
+    }
+
+    const alumno = ALUMNOS_REGISTRADOS.find(a => String(a.email).toLowerCase() === email || String(a.dni) === email);
 
     if (!alumno) {
+        registerFailedAttempt(role);
         showToast('No se encontró una cuenta con ese email/DNI. Registrate primero.', 'error');
         return;
     }
 
     if (alumno.passwordHash !== simpleHash(password) && alumno.password !== password) {
+        registerFailedAttempt(role);
         showToast('Contraseña incorrecta', 'error');
         return;
     }
     if (!alumno.passwordHash) { alumno.passwordHash = simpleHash(password); saveAlumnos(); }
 
+    registerSuccessAttempt(role);
     USERS.alumno = alumno;
     saveUsers();
+    saveSession(role, alumno);
     showApp('alumno');
     showToast(`¡Bienvenido, ${alumno.nombre}!`, 'success');
 });
@@ -1182,12 +1381,16 @@ function logout() {
     if (AppState.examenTimer) clearInterval(AppState.examenTimer);
     if (AppState.qrTimerInterval) clearInterval(AppState.qrTimerInterval);
     if (AppState.realtimeInterval) clearInterval(AppState.realtimeInterval);
+    stopAlumnoQRCodeScanner();
+    clearSession();
 
-    AppState.currentRole = null;
-    AppState.currentUser = null;
     AppState.aulaControlada = false;
     AppState.examenActual.respuestas = {};
     AppState.examenActual.preguntaActual = 0;
+    AppState.userMenuOpen = false;
+
+    const userMenu = document.getElementById('user-menu');
+    if (userMenu) userMenu.style.display = 'none';
 
     document.querySelectorAll('.screen').forEach(s => s.style.display = 'none');
     showScreen('screen-welcome');
@@ -1225,6 +1428,13 @@ function toggleNotifications() {
     if (panel) {
         panel.style.display = panel.style.display === 'none' ? 'block' : 'none';
     }
+}
+
+function toggleUserMenu() {
+    const menu = document.getElementById('user-menu');
+    if (!menu) return;
+    AppState.userMenuOpen = !AppState.userMenuOpen;
+    menu.style.display = AppState.userMenuOpen ? 'block' : 'none';
 }
 
 // ============================================
@@ -1510,13 +1720,300 @@ function guardarAsistencia() {
 // ============================================
 // QR
 // ============================================
+function buildAsistenciaQRPayload() {
+    const cursoId = document.getElementById('asistencia-curso')?.value || '0';
+    const curso = CURSOS.find(c => String(c.id) === String(cursoId)) || { nombre: 'Curso sin nombre' };
+    const timestamp = Date.now();
+    const token = `${Date.now()}-${Math.random().toString(36).slice(2, 10)}`;
+
+    return `AULA_DIGITAL_PRO|asistencia|cursoId=${cursoId}|curso=${encodeURIComponent(curso.nombre)}|ts=${timestamp}|token=${token}`;
+}
+
+function buildAsistenciaQRUrl(payload) {
+    const rawBase = window.location.href.split('?')[0].split('#')[0];
+    const base = rawBase && rawBase !== 'about:blank' ? rawBase : 'https://auladigital.local';
+    return `${base}?qr=${encodeURIComponent(payload)}`;
+}
+
+function parseAsistenciaQRPayload(rawValue) {
+    if (typeof rawValue !== 'string') return null;
+    const value = rawValue.trim();
+    if (!value || !value.startsWith('AULA_DIGITAL_PRO|asistencia|')) return null;
+
+    const parts = value.split('|');
+    if (parts.length < 6) return null;
+
+    const cursoId = Number(parts[2].replace('cursoId=', '')) || 0;
+    const curso = decodeURIComponent(parts[3].replace('curso=', ''));
+    const ts = Number(parts[4].replace('ts=', '')) || 0;
+    const token = parts[5].replace('token=', '');
+
+    if (!cursoId || !ts || !token) return null;
+
+    return { type: 'asistencia', cursoId, curso, ts, token };
+}
+
+function renderAlumnoAsistenciaStatus() {
+    const container = document.getElementById('asistencia-alumno-status');
+    if (!container) return;
+
+    const alumno = USERS.alumno;
+    if (!alumno) {
+        container.innerHTML = '<p class="empty-state">Iniciá sesión para registrar tu asistencia.</p>';
+        return;
+    }
+
+    const registros = ASISTENCIAS.filter(item => Number(item.alumnoId) === Number(alumno.id) && item.source === 'qr')
+        .slice(-5)
+        .reverse();
+
+    if (registros.length === 0) {
+        container.innerHTML = '<p class="empty-state">Aún no registraste tu ingreso.</p>';
+        return;
+    }
+
+    container.innerHTML = registros.map(item => `
+        <div class="list-item" style="display:flex; justify-content:space-between; align-items:center; gap:12px; padding:10px 0; border-bottom:1px solid var(--border-color);">
+            <div>
+                <strong>${esc(item.cursoNombre || 'Curso')}</strong>
+                <div style="color:var(--text-secondary); font-size:0.8rem;">${new Date(item.fecha).toLocaleString('es-AR', { dateStyle: 'short', timeStyle: 'short' })}</div>
+            </div>
+            <span class="badge badge-green">Registrado</span>
+        </div>
+    `).join('');
+}
+
+function stopAlumnoQRCodeScanner() {
+    const video = document.getElementById('qr-video');
+    if (video && video.srcObject) {
+        video.srcObject.getTracks().forEach(track => track.stop());
+        video.srcObject = null;
+    }
+    AppState.alumnoQrStream = null;
+}
+
+function scanQRCodeFromFile(input) {
+    if (!input || !input.files || !input.files[0]) return;
+    if (!window.jsQR) {
+        showToast('La lectura de QR desde imagen no está disponible en este navegador.', 'error');
+        return;
+    }
+
+    const file = input.files[0];
+    const reader = new FileReader();
+    reader.onload = (event) => {
+        const image = new Image();
+        image.onload = () => {
+            const canvas = document.createElement('canvas');
+            const ctx = canvas.getContext('2d');
+            canvas.width = image.width;
+            canvas.height = image.height;
+            ctx.drawImage(image, 0, 0, canvas.width, canvas.height);
+
+            const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+            const code = jsQR(imageData.data, canvas.width, canvas.height, { inversionAttempts: 'dontInvert' });
+
+            if (!code) {
+                showToast('No se pudo leer un QR válido en la imagen.', 'error');
+                input.value = '';
+                return;
+            }
+
+            const ok = registrarAsistenciaDesdeQR(code.data);
+            if (ok) {
+                const status = document.getElementById('qr-status');
+                if (status) status.textContent = 'QR leído correctamente. Asistencia registrada.';
+            }
+            input.value = '';
+        };
+        image.src = event.target.result;
+    };
+    reader.readAsDataURL(file);
+}
+
+function scanFrameFromVideo() {
+    const video = document.getElementById('qr-video');
+    const status = document.getElementById('qr-status');
+    if (!video || !video.videoWidth || !video.videoHeight) {
+        requestAnimationFrame(scanFrameFromVideo);
+        return;
+    }
+
+    const canvas = document.createElement('canvas');
+    const context = canvas.getContext('2d');
+    canvas.width = video.videoWidth;
+    canvas.height = video.videoHeight;
+    context.drawImage(video, 0, 0, canvas.width, canvas.height);
+
+    const imageData = context.getImageData(0, 0, canvas.width, canvas.height);
+    const code = window.jsQR ? jsQR(imageData.data, canvas.width, canvas.height, { inversionAttempts: 'dontInvert' }) : null;
+
+    if (code) {
+        const ok = registrarAsistenciaDesdeQR(code.data);
+        if (ok) {
+            if (status) status.textContent = 'QR detectado. Asistencia registrada.';
+            stopAlumnoQRCodeScanner();
+            return;
+        }
+    }
+
+    if (AppState.alumnoQrStream) {
+        requestAnimationFrame(scanFrameFromVideo);
+    }
+}
+
+function startAlumnoQRCodeScanner() {
+    const video = document.getElementById('qr-video');
+    const status = document.getElementById('qr-status');
+
+    if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+        showToast('Tu navegador no soporta acceso a cámara para escanear QR.', 'error');
+        return;
+    }
+
+    if (!video) return;
+    if (AppState.alumnoQrStream) {
+        showToast('La cámara ya está en uso.', 'info');
+        return;
+    }
+
+    navigator.mediaDevices.getUserMedia({
+        video: { facingMode: 'environment' },
+        audio: false
+    }).then(stream => {
+        AppState.alumnoQrStream = stream;
+        video.srcObject = stream;
+        video.play();
+        if (status) status.textContent = 'Apuntá la cámara al QR del docente...';
+        scanFrameFromVideo();
+    }).catch(err => {
+        console.error('[AulaDigital] Error acceso a cámara:', err);
+        showToast('No se pudo acceder a la cámara. Probá con una imagen.', 'error');
+        if (status) status.textContent = 'No se pudo acceder a la cámara. Probá con una imagen.';
+    });
+}
+
+function registrarAsistenciaDesdeQR(payload) {
+    const parsed = parseAsistenciaQRPayload(payload);
+    if (!parsed) {
+        showToast('El código QR escaneado no corresponde a una asistencia válida.', 'error');
+        return false;
+    }
+
+    const now = Date.now();
+    const ttl = 5 * 60 * 1000;
+    if (now - parsed.ts > ttl) {
+        showToast('El código QR ya expiró. Pedí uno nuevo al docente.', 'warning');
+        return false;
+    }
+
+    const alumno = USERS.alumno;
+    if (!alumno) {
+        showToast('Iniciá sesión como alumno para registrar tu asistencia.', 'info');
+        return false;
+    }
+
+    const cursoId = parseInt(parsed.cursoId, 10);
+    const alumnosDelCurso = ALUMNOS_POR_CURSO[cursoId] || [];
+    const existe = alumnosDelCurso.some(a => Number(a.id) === Number(alumno.id));
+
+    if (!existe) {
+        showToast('Este QR no corresponde a tu curso.', 'error');
+        return false;
+    }
+
+    const yaRegistrado = ASISTENCIAS.some(item => {
+        const sameToken = item?.qrToken === parsed.token;
+        const sameAlumno = Number(item?.alumnoId) === Number(alumno.id);
+        const sameCurso = Number(item?.cursoId) === Number(cursoId);
+        return sameToken || (sameAlumno && sameCurso && item?.fecha && (Date.now() - new Date(item.fecha).getTime() < ttl));
+    });
+
+    if (yaRegistrado) {
+        showToast('Ya registraste tu asistencia para este QR.', 'info');
+        renderAlumnoAsistenciaStatus();
+        return true;
+    }
+
+    ASISTENCIAS.push({
+        fecha: new Date().toISOString(),
+        cursoId,
+        cursoNombre: parsed.curso,
+        alumnoId: alumno.id,
+        alumnoNombre: alumno.nombre,
+        alumnoApellido: alumno.apellido,
+        presente: true,
+        qrToken: parsed.token,
+        source: 'qr'
+    });
+    saveAsistencias();
+    renderAsistenciaHistorial();
+    renderAlumnoAsistenciaStatus();
+    showToast(`Asistencia registrada en ${parsed.curso}.`, 'success');
+    return true;
+}
+
+function initQRCodeReaderFromUrl() {
+    try {
+        const params = new URLSearchParams(window.location.search);
+        const payload = params.get('qr') || params.get('payload') || params.get('aula');
+        if (payload) {
+            const decoded = decodeURIComponent(payload);
+            if (registrarAsistenciaDesdeQR(decoded)) {
+                history.replaceState(null, '', window.location.pathname);
+            }
+        }
+    } catch (error) {
+        console.warn('[AulaDigital] Error leyendo payload QR desde URL:', error);
+    }
+}
+
 function generarQR() {
     const qrDisplay = document.getElementById('qr-display');
-    if (qrDisplay) {
-        qrDisplay.style.display = 'block';
-        startQRTimer();
-        showToast('QR generado. Válido por 5 minutos.', 'success');
+    const qrCodeEl = document.getElementById('qr-code');
+    const cursoId = document.getElementById('asistencia-curso')?.value;
+
+    if (!cursoId) {
+        showToast('Seleccioná un curso antes de generar el QR.', 'error');
+        return;
     }
+
+    if (!window.QRCode) {
+        console.error('[AulaDigital] QRCode library no está disponible.');
+        showToast('No se pudo generar el QR en este navegador.', 'error');
+        return;
+    }
+
+    if (qrDisplay) qrDisplay.style.display = 'block';
+
+    const payload = buildAsistenciaQRPayload();
+    const qrUrl = buildAsistenciaQRUrl(payload);
+    if (qrCodeEl) {
+        qrCodeEl.innerHTML = '';
+
+        const canvas = document.createElement('canvas');
+        canvas.width = 180;
+        canvas.height = 180;
+
+        QRCode.toCanvas(canvas, qrUrl, {
+            width: 180,
+            margin: 1,
+            color: {
+                dark: '#101828',
+                light: '#ffffff'
+            }
+        }, (error) => {
+            if (error) {
+                console.error('[AulaDigital] Error generando QR:', error);
+                qrCodeEl.innerHTML = '<div class="empty-state">No se pudo generar el QR.</div>';
+                return;
+            }
+            qrCodeEl.appendChild(canvas);
+        });
+    }
+
+    startQRTimer();
+    showToast('QR generado. Válido por 5 minutos.', 'success');
 }
 
 function startQRTimer() {
@@ -1539,7 +2036,7 @@ function startQRTimer() {
 
 function regenerarQR() {
     clearInterval(AppState.qrTimerInterval);
-    startQRTimer();
+    generarQR();
     showToast('QR regenerado', 'success');
 }
 
