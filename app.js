@@ -5,7 +5,7 @@
 
 'use strict';
 
-const APP_VERSION = '1.2.5';
+const APP_VERSION = '1.2.6';
 
 // ============================================
 // STATE
@@ -530,10 +530,6 @@ function initApp() {
     }, 3000);
 }
 
-function showLatestUpdateNotice() {
-    setTimeout(() => showToast(`Actualización v${APP_VERSION}: Informática y materiales por curso ya están disponibles.`, 'info'), 250);
-}
-
 // ============================================
 // WELCOME - NAVIGATION
 // ============================================
@@ -583,7 +579,6 @@ function showApp(role) {
         showView('view-dashboard-admin');
         populateAdminDashboard();
     }
-    showLatestUpdateNotice();
 }
 
 // ============================================
