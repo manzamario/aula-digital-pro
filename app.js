@@ -33,6 +33,8 @@ const AppState = {
     examenTimer: null,
     realtimeInterval: null,
     alumnoQrStream: null,
+    classAccessExpiresAt: null,
+    classCourseId: null,
     sessionToken: null,
     sessionExpiresAt: null,
     loginAttempts: {
@@ -114,6 +116,8 @@ function clearSession() {
     AppState.currentUser = null;
     AppState.sessionToken = null;
     AppState.sessionExpiresAt = null;
+    AppState.classAccessExpiresAt = null;
+    AppState.classCourseId = null;
     sessionStorage.removeItem('aulaSession');
 }
 
@@ -138,10 +142,31 @@ function restoreSession() {
         AppState.currentUser = target;
         AppState.sessionToken = data.token;
         AppState.sessionExpiresAt = data.expiresAt;
+        AppState.classAccessExpiresAt = data.classAccessExpiresAt || null;
+        AppState.classCourseId = data.classCourseId || null;
         return true;
     } catch (e) {
         clearSession();
         return false;
+    }
+}
+
+function hasActiveClassAccess() {
+    return AppState.currentRole === 'alumno' && AppState.classAccessExpiresAt && Date.now() < AppState.classAccessExpiresAt;
+}
+
+function grantClassAccess(durationMinutes = 90, courseId = null) {
+    AppState.classAccessExpiresAt = Date.now() + durationMinutes * 60 * 1000;
+    AppState.classCourseId = courseId ? Number(courseId) : null;
+    const raw = sessionStorage.getItem('aulaSession');
+    if (!raw) return;
+    try {
+        const session = JSON.parse(raw);
+        session.classAccessExpiresAt = AppState.classAccessExpiresAt;
+        session.classCourseId = AppState.classCourseId;
+        sessionStorage.setItem('aulaSession', JSON.stringify(session));
+    } catch (e) {
+        console.warn('[AulaDigital] No se pudo guardar el acceso de clase:', e);
     }
 }
 
@@ -730,6 +755,9 @@ function buildSidebar(role) {
             <div class="nav-item" onclick="showView('view-materiales')" data-view="view-materiales">
                 <span class="nav-icon">📚</span> Materiales
             </div>
+            <div class="nav-item" onclick="showView('view-informatica')" data-view="view-informatica">
+                <span class="nav-icon">💻</span> Informática
+            </div>
             <div class="nav-item" onclick="showView('view-tp')" data-view="view-tp">
                 <span class="nav-icon">📝</span> Trabajos Prácticos
             </div>
@@ -756,6 +784,9 @@ function buildSidebar(role) {
             <div class="nav-section"><div class="nav-section-title">Aprendizaje</div></div>
             <div class="nav-item" onclick="showView('view-material-alumno')" data-view="view-material-alumno">
                 <span class="nav-icon">📚</span> Materiales
+            </div>
+            <div class="nav-item" onclick="showView('view-informatica')" data-view="view-informatica">
+                <span class="nav-icon">💻</span> Informática
             </div>
             <div class="nav-item" onclick="showView('view-tp-alumno')" data-view="view-tp-alumno">
                 <span class="nav-icon">📝</span> Mis Trabajos Prácticos
@@ -825,6 +856,11 @@ function toggleSidebar() {
 // VIEW MANAGEMENT
 // ============================================
 function showView(viewId) {
+    const restrictedViews = ['view-material-alumno', 'view-tp-alumno', 'view-examen-alumno', 'view-informatica'];
+    if (AppState.currentRole === 'alumno' && restrictedViews.includes(viewId) && !hasActiveClassAccess()) {
+        showToast('Acceso disponible únicamente durante la clase. Escaneá el QR del docente.', 'warning');
+        viewId = 'view-asistencia-alumno';
+    }
     document.querySelectorAll('.view').forEach(v => v.style.display = 'none');
 
     const view = document.getElementById(viewId);
@@ -841,6 +877,7 @@ function showView(viewId) {
         'view-dashboard-admin': 'Base de Datos',
         'view-asistencia': 'Asistencia',
         'view-materiales': 'Materiales Didácticos',
+        'view-informatica': 'Informática',
         'view-tp': 'Trabajos Prácticos',
         'view-examenes': 'Exámenes',
         'view-aula-controlada': 'Aula Controlada',
@@ -873,6 +910,8 @@ function initViewContent(viewId) {
         renderAsistenciaHistorial();
     } else if (viewId === 'view-materiales') {
         renderMateriales();
+    } else if (viewId === 'view-material-alumno') {
+        renderMaterialesAlumno();
     } else if (viewId === 'view-tp') {
         renderTP();
     } else if (viewId === 'view-examenes') {
@@ -884,6 +923,9 @@ function initViewContent(viewId) {
         populateRealtimeExamenes();
     } else if (viewId === 'view-asistencia-alumno') {
         renderAlumnoAsistenciaStatus();
+    } else if (viewId === 'view-informatica') {
+        const libraryLink = document.getElementById('docente-informatica-library');
+        if (libraryLink) libraryLink.style.display = ['docente', 'admin'].includes(AppState.currentRole) ? 'inline-block' : 'none';
     }
 }
 
@@ -1116,6 +1158,22 @@ function renderMateriales() {
             </div>
         </div>`;
     }).join('');
+}
+
+function renderMaterialesAlumno() {
+    const grid = document.querySelector('#view-material-alumno .materiales-grid');
+    if (!grid) return;
+    const publicados = MATERIALES.filter(material => material.publicado !== false &&
+        (!material.cursoId || Number(material.cursoId) === Number(AppState.classCourseId)));
+    if (publicados.length === 0) {
+        grid.innerHTML = '<p class="empty-state">El docente todavía no publicó materiales para esta clase.</p>';
+        return;
+    }
+    grid.innerHTML = publicados.map(material => `
+        <div class="card" style="margin-bottom:1rem;">
+            <div class="card-header"><h3>📚 ${esc(material.titulo)}</h3><span class="badge badge-green">Disponible en clase</span></div>
+            <div class="card-body"><p>${esc(material.descripcion || 'Material indicado por el docente.')}</p><small>Publicado: ${new Date(material.fecha).toLocaleDateString('es-AR')}</small></div>
+        </div>`).join('');
 }
 
 // ============================================
@@ -1647,6 +1705,9 @@ function showModal(modalId) {
     const overlay = document.getElementById('modal-overlay');
     const modal = document.getElementById(modalId);
     if (overlay && modal) {
+        if (modalId === 'modal-nuevo-material') {
+            populateSelectOptions('material-curso', CURSOS.map(c => ({ value: c.id, label: `${c.nombre} — ${c.escuela}` })));
+        }
         overlay.querySelectorAll('.modal').forEach(m => m.style.display = 'none');
         modal.style.display = 'block';
         overlay.style.display = 'flex';
@@ -1715,7 +1776,9 @@ function crearMaterial() {
         descripcion: descripcion,
         tipo: document.getElementById('material-tipo')?.value || 'PDF',
         fecha: new Date().toISOString(),
-        creadoPor: USERS.docente?.id
+        creadoPor: USERS.docente?.id,
+        publicado: document.getElementById('material-publicado')?.value !== 'false',
+        cursoId: Number(document.getElementById('material-curso')?.value) || null
     });
     saveMateriales();
     closeAllModals();
@@ -1954,6 +2017,8 @@ function buildAsistenciaQRPayload() {
     const timestamp = Date.now();
     const token = `${Date.now()}-${Math.random().toString(36).slice(2, 10)}`;
 
+    // FORMATO: AULA_DIGITAL_PRO|asistencia|cursoId=<id>|curso=<nombre encodeURIComponent>|ts=<timestamp>|token=<aleatorio>
+    // Nota: se mantiene compatibilidad con payloads generados anteriormente.
     return `AULA_DIGITAL_PRO|asistencia|cursoId=${cursoId}|curso=${encodeURIComponent(curso.nombre)}|ts=${timestamp}|token=${token}`;
 }
 
@@ -1962,27 +2027,53 @@ function buildAsistenciaQRUrl(payload) {
     const publicBase = 'https://manzamario.github.io/aula-digital-pro/';
     const baseUrl = new URL(rawBase && /^https?:\/\//i.test(rawBase) ? rawBase : publicBase);
 
+    // Añadimos versión para permitir debugging y manejo de cambios futuros
     baseUrl.searchParams.set('v', APP_VERSION);
+    // El parámetro `qr` contiene el payload tal como se construyó en `buildAsistenciaQRPayload()`
+    // Puede ser un string plano o una cadena URL-encoded; al leerlo usamos decode/normalización.
     baseUrl.searchParams.set('qr', payload);
     return baseUrl.toString();
 }
 
 function parseAsistenciaQRPayload(rawValue) {
-    if (typeof rawValue !== 'string') return null;
-    const value = rawValue.trim();
-    if (!value || !value.startsWith('AULA_DIGITAL_PRO|asistencia|')) return null;
+    // Acepta: texto plano, texto URL-encoded y URLs que incluyan `?qr=`.
+    try {
+        if (typeof rawValue !== 'string') return null;
+        let value = rawValue.trim();
 
-    const parts = value.split('|');
-    if (parts.length < 6) return null;
+        // Si recibimos una URL completa con query param `qr`, extraemos su valor
+        if (/^https?:\/\//i.test(value)) {
+            try {
+                const u = new URL(value);
+                const q = u.searchParams.get('qr');
+                if (q) value = q;
+            } catch (e) {
+                // no es una URL válida, seguimos con el valor original
+            }
+        }
 
-    const cursoId = Number(parts[2].replace('cursoId=', '')) || 0;
-    const curso = decodeURIComponent(parts[3].replace('curso=', ''));
-    const ts = Number(parts[4].replace('ts=', '')) || 0;
-    const token = parts[5].replace('token=', '');
+        // Si viene codificado con % (URL-encoded), lo decodeamos antes de parsear
+        if (/%[0-9A-Fa-f]{2}/.test(value)) {
+            try { value = decodeURIComponent(value); } catch (e) { /* ignore */ }
+        }
 
-    if (!cursoId || !ts || !token) return null;
+        if (!value || !value.startsWith('AULA_DIGITAL_PRO|asistencia|')) return null;
 
-    return { type: 'asistencia', cursoId, curso, ts, token };
+        const parts = value.split('|');
+        if (parts.length < 6) return null;
+
+        const cursoId = Number(parts[2].replace('cursoId=', '')) || 0;
+        const curso = decodeURIComponent(parts[3].replace('curso=', ''));
+        const ts = Number(parts[4].replace('ts=', '')) || 0;
+        const token = parts[5].replace('token=', '');
+
+        if (!cursoId || !ts || !token) return null;
+
+        return { type: 'asistencia', cursoId, curso, ts, token };
+    } catch (err) {
+        // En caso de cualquier error inesperado, devolvemos null (payload inválido)
+        return null;
+    }
 }
 
 function renderAlumnoAsistenciaStatus() {
@@ -2178,7 +2269,9 @@ function registrarAsistenciaDesdeQR(payload) {
     }
 
     if (!alumno) {
-        showToast('Iniciá sesión como alumno para registrar tu asistencia.', 'info');
+        // Si no hay sesión, abrimos modal fallback para que el alumno busque por DNI
+        showModal('modal-fallback-dni');
+        showToast('Iniciá sesión o buscá tu DNI para registrar asistencia.', 'info');
         return false;
     }
 
@@ -2190,6 +2283,8 @@ function registrarAsistenciaDesdeQR(payload) {
         showToast('Este QR no corresponde a tu curso.', 'error');
         return false;
     }
+
+    grantClassAccess(90, cursoId);
 
     const yaRegistrado = ASISTENCIAS.some(item => {
         const sameToken = item?.qrToken === parsed.token;
@@ -2218,8 +2313,45 @@ function registrarAsistenciaDesdeQR(payload) {
     saveAsistencias();
     renderAsistenciaHistorial();
     renderAlumnoAsistenciaStatus();
+    showView('view-informatica');
     showToast(`Bienvenida a clases, ${esc(alumno.nombre)} ${esc(alumno.apellido)}. Asistencia registrada en ${parsed.curso}.`, 'success');
     return true;
+}
+
+// ===== Fallback DNI: búsqueda y selección cuando no hay sesión activa =====
+function fallbackBuscarPorDni() {
+    const dni = document.getElementById('fallback-dni-input')?.value.trim();
+    const results = document.getElementById('fallback-dni-results');
+    if (!dni) { showToast('Ingresá un DNI válido', 'error'); return; }
+
+    const matches = ALUMNOS_REGISTRADOS.filter(a => String(a.dni).replace(/\D/g,'').includes(String(dni).replace(/\D/g,'')));
+    if (!results) return;
+    if (matches.length === 0) {
+        results.innerHTML = `<p class="empty-state">No se encontraron alumnos con ese DNI.</p>`;
+        return;
+    }
+
+    results.innerHTML = matches.map(a => `
+        <div class="list-item" style="display:flex; justify-content:space-between; align-items:center; gap:8px; padding:6px 0;">
+            <div>
+                <strong>${esc(a.nombre)} ${esc(a.apellido)}</strong>
+                <div style="color:var(--text-secondary); font-size:0.85rem;">DNI: ${esc(a.dni)} · Curso: ${esc(a.curso || '')}</div>
+            </div>
+            <div><button class="btn btn-primary" onclick="fallbackSeleccionarAlumno(${Number(a.id)})">Seleccionar</button></div>
+        </div>
+    `).join('');
+}
+
+function fallbackSeleccionarAlumno(alumnoId) {
+    const alumno = ALUMNOS_REGISTRADOS.find(a => Number(a.id) === Number(alumnoId));
+    if (!alumno) { showToast('Alumno no encontrado', 'error'); return; }
+
+    // Crear sesión temporal para proceder con el registro (no guarda contraseña)
+    USERS.alumno = { ...alumno };
+    saveSession('alumno', USERS.alumno);
+    closeAllModals();
+    showToast(`Sesión iniciada como ${esc(alumno.nombre)} ${esc(alumno.apellido)} (temporal)`, 'success');
+    // Volver a intentar registrar la última lectura QR si existe en el historial de navegación
 }
 
 function initQRCodeReaderFromUrl() {
