@@ -527,7 +527,6 @@ function initApp() {
         const splash = document.getElementById('splash-screen');
         if (splash) splash.style.display = 'none';
         showScreen('screen-welcome');
-        showLatestUpdateNotice();
     }, 3000);
 }
 
