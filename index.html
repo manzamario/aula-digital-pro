@@ -985,6 +985,24 @@
                 </div>
             </div>
 
+            <!-- ==================== INFORMÁTICA ==================== -->
+            <div id="view-informatica" class="view" style="display:none;">
+                <div class="view-header">
+                    <h2>💻 Informática</h2>
+                    <p>Contenido habilitado por el docente para esta clase</p>
+                </div>
+                <div class="card">
+                    <div class="card-body">
+                        <h3>🔒 Aula de clase activa</h3>
+                        <p>Este espacio solo está disponible durante la clase presencial. El docente irá habilitando el material y la actividad correspondiente.</p>
+                        <p class="empty-state">No se muestra el índice completo para evitar el acceso anticipado a otros contenidos.</p>
+                        <button class="btn btn-primary" onclick="showView('view-material-alumno')">Ver material habilitado</button>
+                        <button class="btn btn-outline" onclick="showView('view-tp-alumno')">Ver trabajo de la clase</button>
+                        <a id="docente-informatica-library" class="btn btn-outline" href="informatica/index.html" target="_blank" rel="noopener" style="display:none;">Abrir biblioteca completa</a>
+                    </div>
+                </div>
+            </div>
+
             <!-- ==================== TP ALUMNO ==================== -->
             <div id="view-tp-alumno" class="view" style="display:none;">
                 <div class="view-header">
@@ -1191,6 +1209,9 @@
                     <div class="form-group"><label>Título *</label><input type="text" id="material-titulo" required placeholder="Título del material"></div>
                     <div class="form-group"><label>Descripción</label><textarea class="form-textarea" id="material-descripcion" rows="3" placeholder="Descripción del material..."></textarea></div>
                     <div class="form-group"><label>Tipo</label><select class="form-select" id="material-tipo"><option>PDF</option><option>Video (enlace)</option><option>Texto</option></select></div>
+                    <div class="form-group"><label>Curso destinatario</label><select class="form-select" id="material-curso"><option value="">Todos los cursos</option></select></div>
+                    <div class="form-group"><label>Disponibilidad</label><select class="form-select" id="material-publicado"><option value="true">Publicar para alumnos</option><option value="false">Guardar como borrador</option></select></div>
+                    <div class="form-group"><label>Disponibilidad</label><select class="form-select" id="material-publicado"><option value="true">Publicar para alumnos</option><option value="false">Guardar como borrador</option></select></div>
                     <div class="form-group"><label>Archivo / Contenido</label><div class="file-upload-area"><div class="upload-icon">📤</div><p>Arrastrá el archivo o hacé clic</p></div></div>
                 </form>
             </div>
@@ -1222,6 +1243,20 @@
                 </form>
             </div>
             <div class="modal-footer"><button class="btn btn-outline" onclick="closeAllModals()">Cancelar</button><button class="btn btn-primary" onclick="crearExamen()">Crear Examen</button></div>
+        </div>
+
+        <!-- Modal fallback: búsqueda por DNI para registrar asistencia cuando no hay sesión -->
+        <div class="modal modal-lg" id="modal-fallback-dni" onclick="event.stopPropagation()" style="display:none;">
+            <div class="modal-header"><h3>🔎 Identificación por DNI</h3><button class="modal-close" onclick="closeAllModals()">✕</button></div>
+            <div class="modal-body">
+                <p>Si no tenés sesión iniciada, buscá tu nombre por DNI y seleccioná tu registro.</p>
+                <div class="form-group"><label>DNI</label><input type="text" id="fallback-dni-input" placeholder="Ingrese DNI" /></div>
+                <div id="fallback-dni-results" style="margin-top:12px;"></div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-outline" onclick="closeAllModals()">Cancelar</button>
+                <button class="btn btn-primary" onclick="fallbackBuscarPorDni()">Buscar</button>
+            </div>
         </div>
 
         <div class="modal modal-lg" id="modal-nueva-pregunta" onclick="event.stopPropagation()" style="display:none;">
@@ -1313,6 +1348,5 @@
         </div>
     </div>
 
-    <script src="app.js?v=2.0.0"></script>
 </body>
 </html>
