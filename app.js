@@ -5,7 +5,7 @@
 
 'use strict';
 
-const APP_VERSION = '1.2.4';
+const APP_VERSION = '1.2.5';
 
 // ============================================
 // STATE
@@ -527,7 +527,12 @@ function initApp() {
         const splash = document.getElementById('splash-screen');
         if (splash) splash.style.display = 'none';
         showScreen('screen-welcome');
+        showLatestUpdateNotice();
     }, 3000);
+}
+
+function showLatestUpdateNotice() {
+    setTimeout(() => showToast(`Actualización v${APP_VERSION}: Informática y materiales por curso ya están disponibles.`, 'info'), 250);
 }
 
 // ============================================
@@ -579,6 +584,7 @@ function showApp(role) {
         showView('view-dashboard-admin');
         populateAdminDashboard();
     }
+    showLatestUpdateNotice();
 }
 
 // ============================================
